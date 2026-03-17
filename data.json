@@ -1,30 +1,49 @@
 {
-  "reports": [],
+  "reports": [
+    {
+      "id": 1773755735018,
+      "date": "2026-03-01",
+      "store": "F-1",
+      "adminName": "ÃÂÃÂÃÂÃÂ¡ÃÂÃÂÃÂÃÂ¸ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¾ÃÂÃÂÃÂÃÂ",
+      "totalCheck": 70000,
+      "cashless": 50000,
+      "cash": 20000,
+      "returnCash": 0,
+      "returnCashless": 0,
+      "expenses": [],
+      "receiptImage": null,
+      "totalSales": 70000,
+      "totalReturns": 0,
+      "totalExpenses": 0,
+      "safeCash": 41880,
+      "safeCashless": 530215
+    }
+  ],
   "categories": [
     {
       "id": "products",
-      "name": "ÐÐ°Ò³ÑÑÐ»Ð¾Ñ"
+      "name": "Маҳсулот"
     },
     {
       "id": "salary",
-      "name": "ÐÑÐ·Ð´"
+      "name": "Музд"
     },
     {
       "id": "rent",
-      "name": "ÐÒ·Ð¾ÑÐ°"
+      "name": "Иҷора"
     },
     {
       "id": "utilities",
-      "name": "ÐÐ¾Ð¼Ð¼ÑÐ½Ð°Ð»"
+      "name": "Коммунал"
     },
     {
       "id": "other",
-      "name": "ÐÐ¸Ð³Ð°Ñ"
+      "name": "Дигар"
     },
     {
       "id": "cat_1773754467209",
-      "name": "ÃÂÃÂÃÂÃÂ¸ÃÂÃÂÃÂÃÂ¾ÃÂÃÂÃÂÃÂ¸ÃÂÃÂ´ÃÂÃÂ´ÃÂÃÂ¸ÃÂÃÂ½"
+      "name": "ÃÂÃÂ¸ÃÂÃÂ¾ÃÂÃÂ¸ÃÂ´ÃÂ´ÃÂ¸ÃÂ½"
     }
   ],
-  "lastUpdate": "2026-03-17T13:56:14.052Z"
+  "lastUpdate": "2026-03-17T13:56:15.218Z"
 }
