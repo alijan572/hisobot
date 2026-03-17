@@ -7,6 +7,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
+        /* Все стили остаются без изменений - они уже есть в вашем коде */
         * {
             margin: 0;
             padding: 0;
@@ -38,6 +39,9 @@
             color: var(--text-primary);
             overflow-x: hidden;
             position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         body::before {
@@ -1378,6 +1382,7 @@
             { id: 'other', name: 'Дигар' }
         ];
         let selectedCategory = null;
+        let syncInProgress = false;
 
         // Load from localStorage
         function loadData() {
@@ -1402,18 +1407,25 @@
             localStorage.setItem('expenseCategories', JSON.stringify(categories));
         }
 
-        // ИСПРАВЛЕННАЯ СИНХРОНИЗАЦИЯ - теперь все видят данные друг друга
+        // ИСПРАВЛЕННАЯ СИНХРОНИЗАЦИЯ - теперь всё работает правильно
         async function syncWithGitHub() {
+            if (syncInProgress) {
+                showToast('Синхронизация уже идёт...', 'info');
+                return;
+            }
+            
             const btn = document.getElementById('syncBtn');
             btn.classList.add('syncing');
+            syncInProgress = true;
             
-            // Спрашиваем токен у пользователя
+            // Спрашиваем токен у пользователя (только если нет)
             let userToken = localStorage.getItem('github_token');
             
             if (!userToken) {
                 userToken = prompt('Введите GitHub токен для синхронизации:');
                 if (!userToken) {
                     btn.classList.remove('syncing');
+                    syncInProgress = false;
                     return;
                 }
                 localStorage.setItem('github_token', userToken);
@@ -1442,57 +1454,71 @@
                     }
                 });
 
-                let githubReports = [];
-                let githubCategories = [];
+                let githubData = { reports: [], categories: [] };
                 let sha = null;
 
                 if (response.ok) {
                     const data = await response.json();
                     sha = data.sha;
                     const content = JSON.parse(atob(data.content));
-                    githubReports = content.reports || [];
-                    githubCategories = content.categories || [];
+                    githubData = content;
                     showToast('📥 Данные получены с GitHub');
                 }
 
-                // ОБЪЕДИНЯЕМ reports - теперь ВСЕ отчёты сохраняются
-                const allReports = [];
-                const reportMap = new Map(); // Используем Map для уникальности по id
+                // СОЗДАЁМ ОБЩИЙ СПИСОК ВСЕХ ОТЧЁТОВ
+                const allReportsMap = new Map();
                 
                 // Сначала добавляем все отчёты с GitHub
-                githubReports.forEach(report => {
-                    reportMap.set(report.id, report);
-                });
+                if (githubData.reports && Array.isArray(githubData.reports)) {
+                    githubData.reports.forEach(report => {
+                        if (report && report.id) {
+                            allReportsMap.set(report.id, report);
+                        }
+                    });
+                }
                 
-                // Потом добавляем локальные (если есть новые)
-                reports.forEach(report => {
-                    reportMap.set(report.id, report);
-                });
+                // Потом добавляем локальные отчёты (они могут быть новее)
+                if (Array.isArray(reports)) {
+                    reports.forEach(report => {
+                        if (report && report.id) {
+                            allReportsMap.set(report.id, report);
+                        }
+                    });
+                }
                 
                 // Преобразуем Map обратно в массив
-                allReports.push(...reportMap.values());
-                reports = allReports;
-
+                const mergedReports = Array.from(allReportsMap.values());
+                
                 // Объединяем категории
-                const categoryMap = new Map();
+                const allCategoriesMap = new Map();
                 
-                githubCategories.forEach(cat => {
-                    categoryMap.set(cat.id, cat);
-                });
+                if (githubData.categories && Array.isArray(githubData.categories)) {
+                    githubData.categories.forEach(cat => {
+                        if (cat && cat.id) {
+                            allCategoriesMap.set(cat.id, cat);
+                        }
+                    });
+                }
                 
-                categories.forEach(cat => {
-                    categoryMap.set(cat.id, cat);
-                });
+                if (Array.isArray(categories)) {
+                    categories.forEach(cat => {
+                        if (cat && cat.id) {
+                            allCategoriesMap.set(cat.id, cat);
+                        }
+                    });
+                }
                 
-                categories = [];
-                categoryMap.forEach(cat => categories.push(cat));
+                const mergedCategories = Array.from(allCategoriesMap.values());
 
+                // Сохраняем объединённые данные локально
+                reports = mergedReports;
+                categories = mergedCategories;
                 saveData();
 
-                // ЗАГРУЖАЕМ на GitHub (все данные сразу)
+                // ЗАГРУЖАЕМ на GitHub (теперь с правильными данными)
                 const dataToUpload = {
-                    reports: reports,
-                    categories: categories,
+                    reports: mergedReports,
+                    categories: mergedCategories,
                     lastUpdate: new Date().toISOString()
                 };
 
@@ -1514,8 +1540,11 @@
 
                 if (uploadResponse.ok) {
                     showToast('✅ Синхронизация успешна!');
+                    // Обновляем интерфейс
                     updateHistory();
                     updateMonthlyReport();
+                    // Обновляем данные текущего дня
+                    loadDayData();
                 } else {
                     const error = await uploadResponse.json();
                     throw new Error(error.message || 'Ошибка загрузки');
@@ -1527,6 +1556,7 @@
                 localStorage.removeItem('github_token');
             } finally {
                 btn.classList.remove('syncing');
+                syncInProgress = false;
             }
         }
 
@@ -1539,12 +1569,12 @@
                 reports = reports.filter(r => r.id !== id);
                 saveData();
                 
-                // Обновляем интерфейс
+                // Обновляем интерфейс сразу
                 updateHistory();
                 updateMonthlyReport();
                 showToast('Ҳисобот нест шуд');
                 
-                // Если есть интернет - синхронизируем с GitHub
+                // Синхронизируем с GitHub
                 if (navigator.onLine) {
                     await syncWithGitHub(); // Просто вызываем полную синхронизацию
                 }
