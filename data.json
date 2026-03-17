@@ -1,49 +1,30 @@
 {
-  "reports": [
-    {
-      "id": 1773755623995,
-      "date": "2026-03-01",
-      "store": "F-1",
-      "adminName": "ÃÂ¡ÃÂ¸ÃÂÃÂ¾ÃÂ",
-      "totalCheck": 70000,
-      "cashless": 50000,
-      "cash": 20000,
-      "returnCash": 0,
-      "returnCashless": 0,
-      "expenses": [],
-      "receiptImage": null,
-      "totalSales": 70000,
-      "totalReturns": 0,
-      "totalExpenses": 0,
-      "safeCash": 41880,
-      "safeCashless": 530215
-    }
-  ],
+  "reports": [],
   "categories": [
     {
       "id": "products",
-      "name": "Маҳсулот"
+      "name": "ÐÐ°Ò³ÑÑÐ»Ð¾Ñ"
     },
     {
       "id": "salary",
-      "name": "Музд"
+      "name": "ÐÑÐ·Ð´"
     },
     {
       "id": "rent",
-      "name": "Иҷора"
+      "name": "ÐÒ·Ð¾ÑÐ°"
     },
     {
       "id": "utilities",
-      "name": "Коммунал"
+      "name": "ÐÐ¾Ð¼Ð¼ÑÐ½Ð°Ð»"
     },
     {
       "id": "other",
-      "name": "Дигар"
+      "name": "ÐÐ¸Ð³Ð°Ñ"
     },
     {
       "id": "cat_1773754467209",
-      "name": "ÃÂÃÂ¸ÃÂÃÂ¾ÃÂÃÂ¸ÃÂ´ÃÂ´ÃÂ¸ÃÂ½"
+      "name": "ÃÂÃÂÃÂÃÂ¸ÃÂÃÂÃÂÃÂ¾ÃÂÃÂÃÂÃÂ¸ÃÂÃÂ´ÃÂÃÂ´ÃÂÃÂ¸ÃÂÃÂ½"
     }
   ],
-  "lastUpdate": "2026-03-17T13:54:10.627Z"
+  "lastUpdate": "2026-03-17T13:54:16.055Z"
 }
