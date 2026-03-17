@@ -1,5 +1,24 @@
 {
-  "reports": [],
+  "reports": [
+    {
+      "id": 1773755623995,
+      "date": "2026-03-01",
+      "store": "F-1",
+      "adminName": "Сироч",
+      "totalCheck": 70000,
+      "cashless": 50000,
+      "cash": 20000,
+      "returnCash": 0,
+      "returnCashless": 0,
+      "expenses": [],
+      "receiptImage": null,
+      "totalSales": 70000,
+      "totalReturns": 0,
+      "totalExpenses": 0,
+      "safeCash": 41880,
+      "safeCashless": 530215
+    }
+  ],
   "categories": [
     {
       "id": "products",
@@ -23,8 +42,8 @@
     },
     {
       "id": "cat_1773754467209",
-      "name": "ÃÂÃÂ¸ÃÂÃÂ¾ÃÂÃÂ¸ÃÂ´ÃÂ´ÃÂ¸ÃÂ½"
+      "name": "сирочиддин"
     }
   ],
-  "lastUpdate": "2026-03-17T13:53:56.858Z"
+  "lastUpdate": "2026-03-17T13:53:59.991Z"
 }
