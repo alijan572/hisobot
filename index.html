@@ -1356,10 +1356,10 @@
     <script>
         // ⚠️ ВАЖНО: Замените эти значения на свои!
         const GITHUB_CONFIG = {
-            owner: 'ВАШ_ЛОГИН',      // Ваш логин GitHub (например: ivan123)
+            owner: 'alijan572',      // Ваш логин GitHub (например: ivan123)
             repo: 'hisobot',          // Название репозитория
             path: 'data.json',        // Файл с данными
-            token: 'ВАШ_ТОКЕН'        // GitHub Personal Access Token
+            token: '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'        // GitHub Personal Access Token
         };
 
         // State
@@ -1402,61 +1402,121 @@
 
         // Sync with GitHub
         async function syncWithGitHub() {
-            const btn = document.getElementById('syncBtn');
-            btn.classList.add('syncing');
-            showToast('Синхронизация...', 'info');
+    const btn = document.getElementById('syncBtn');
+    btn.classList.add('syncing');
+    
+    // Спрашиваем токен у пользователя
+    let userToken = localStorage.getItem('github_token');
+    
+    if (!userToken) {
+        userToken = prompt('Введите GitHub токен для синхронизации:');
+        if (!userToken) {
+            btn.classList.remove('syncing');
+            return;
+        }
+        localStorage.setItem('github_token', userToken);
+    }
+    
+    showToast('Синхронизация...', 'info');
 
-            try {
-                // Пытаемся получить данные с GitHub
-                const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
-                    headers: {
-                        'Authorization': `token ${GITHUB_CONFIG.token}`,
-                        'Accept': 'application/vnd.github.v3+json'
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    const content = JSON.parse(atob(data.content));
-                    
-                    // Объединяем данные (без дубликатов по id)
-                    const allReports = [...reports];
-                    content.reports.forEach(githubReport => {
-                        if (!allReports.some(localReport => localReport.id === githubReport.id)) {
-                            allReports.push(githubReport);
-                        }
-                    });
-                    reports = allReports;
-                    
-                    // Объединяем категории
-                    const allCategories = [...categories];
-                    content.categories.forEach(githubCat => {
-                        if (!allCategories.some(localCat => localCat.id === githubCat.id)) {
-                            allCategories.push(githubCat);
-                        }
-                    });
-                    categories = allCategories;
-                    
-                    saveData();
-                    showToast('Данные синхронизированы!');
-                } else if (response.status === 404) {
-                    // Файл не найден, создаём новый
-                    await uploadToGitHub();
-                }
-
-                // Загружаем на GitHub
-                await uploadToGitHub();
-                updateHistory();
-                updateMonthlyReport();
-
-            } catch (error) {
-                showToast('Ошибка синхронизации', 'error');
-                console.error(error);
-            } finally {
-                btn.classList.remove('syncing');
+    try {
+        // Проверяем соединение с GitHub
+        const testResponse = await fetch('https://api.github.com/user', {
+            headers: {
+                'Authorization': `token ${userToken}`,
+                'Accept': 'application/vnd.github.v3+json'
             }
+        });
+        
+        if (!testResponse.ok) {
+            throw new Error('Токен недействителен');
+        }
+        
+        // Пытаемся получить данные
+        const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+            headers: {
+                'Authorization': `token ${userToken}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const content = JSON.parse(atob(data.content));
+            
+            // Объединяем данные
+            const allReports = [...reports];
+            content.reports.forEach(githubReport => {
+                if (!allReports.some(localReport => localReport.id === githubReport.id)) {
+                    allReports.push(githubReport);
+                }
+            });
+            reports = allReports;
+            
+            saveData();
+            showToast('Данные получены с GitHub!');
+        } else if (response.status === 404) {
+            showToast('Файл data.json будет создан');
         }
 
+        // Загружаем на GitHub
+        const dataToUpload = {
+            reports: reports,
+            categories: categories,
+            lastUpdate: new Date().toISOString()
+        };
+
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify(dataToUpload, null, 2))));
+
+        // Получаем текущий файл для sha
+        const shaResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+            headers: {
+                'Authorization': `token ${userToken}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+
+        let sha = null;
+        if (shaResponse.ok) {
+            const data = await shaResponse.json();
+            sha = data.sha;
+        }
+
+        // Загружаем
+        const uploadResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${userToken}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/vnd.github.v3+json'
+            },
+            body: JSON.stringify({
+                message: 'Sync data from app',
+                content: content,
+                sha: sha
+            })
+        });
+
+        if (uploadResponse.ok) {
+            showToast('✅ Синхронизация успешна!');
+            updateHistory();
+            updateMonthlyReport();
+        } else {
+            const error = await uploadResponse.json();
+            throw new Error(error.message || 'Ошибка загрузки');
+        }
+
+    } catch (error) {
+        console.error('Sync error:', error);
+        showToast('❌ Ошибка синхронизации: ' + error.message, 'error');
+        // Если ошибка с токеном - удаляем его
+        if (error.message.includes('токен') || error.message.includes('token')) {
+            localStorage.removeItem('github_token');
+        }
+    } finally {
+        btn.classList.remove('syncing');
+    }
+}
         // Upload to GitHub
         async function uploadToGitHub() {
             const data = {
