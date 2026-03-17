@@ -1,1 +1,26 @@
-
+{
+  "reports": [],
+  "categories": [
+    {
+      "id": "products",
+      "name": "Маҳсулот"
+    },
+    {
+      "id": "salary",
+      "name": "Музд"
+    },
+    {
+      "id": "rent",
+      "name": "Иҷора"
+    },
+    {
+      "id": "utilities",
+      "name": "Коммунал"
+    },
+    {
+      "id": "other",
+      "name": "Дигар"
+    }
+  ],
+  "lastUpdate": "2026-03-17T12:43:01.000Z"
+}
