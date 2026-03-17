@@ -11,7 +11,7 @@
       "returnCash": 0,
       "returnCashless": 0,
       "expenses": [],
-      "receiptImage": null,
+      "receiptImage": ,
       "totalSales": 10000,
       "totalReturns": 0,
       "totalExpenses": 0,
