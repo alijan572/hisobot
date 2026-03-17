@@ -1,5 +1,24 @@
 {
-  "reports": [],
+  "reports": [
+    {
+      "id": 1773746572096,
+      "date": "2026-03-17",
+      "store": "F-1",
+      "adminName": "сирочиддин",
+      "totalCheck": 10000,
+      "cashless": 1000,
+      "cash": 9000,
+      "returnCash": 0,
+      "returnCashless": 0,
+      "expenses": [],
+      "receiptImage": null,
+      "totalSales": 10000,
+      "totalReturns": 0,
+      "totalExpenses": 0,
+      "safeCash": 30880,
+      "safeCashless": 481215
+    }
+  ],
   "categories": [
     {
       "id": "products",
@@ -22,5 +41,5 @@
       "name": "Дигар"
     }
   ],
-  "lastUpdate": "2026-03-17T11:21:48.773Z"
+  "lastUpdate": "2026-03-17T11:22:59.642Z"
 }
