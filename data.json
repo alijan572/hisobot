@@ -1,26 +1,52 @@
 {
-  "reports": [],
+  "reports": [
+    {
+      "id": 1773751438265,
+      "date": "2026-03-01",
+      "store": "F-1",
+      "adminName": "",
+      "totalCheck": 10000,
+      "cashless": 1000,
+      "cash": 9000,
+      "returnCash": 0,
+      "returnCashless": 0,
+      "expenses": [
+        {
+          "id": 1773751417667,
+          "type": "cash",
+          "category": "salary",
+          "amount": 1000
+        }
+      ],
+      "receiptImage": null,
+      "totalSales": 10000,
+      "totalReturns": 0,
+      "totalExpenses": 1000,
+      "safeCash": 29880,
+      "safeCashless": 481215
+    }
+  ],
   "categories": [
     {
       "id": "products",
-      "name": "ÐÐ°Ò³ÑÑÐ»Ð¾Ñ"
+      "name": "ÃÂÃÂ°ÃÂ³ÃÂÃÂÃÂ»ÃÂ¾ÃÂ"
     },
     {
       "id": "salary",
-      "name": "ÐÑÐ·Ð´"
+      "name": "ÃÂÃÂÃÂ·ÃÂ´"
     },
     {
       "id": "rent",
-      "name": "ÐÒ·Ð¾ÑÐ°"
+      "name": "ÃÂÃÂ·ÃÂ¾ÃÂÃÂ°"
     },
     {
       "id": "utilities",
-      "name": "ÐÐ¾Ð¼Ð¼ÑÐ½Ð°Ð»"
+      "name": "ÃÂÃÂ¾ÃÂ¼ÃÂ¼ÃÂÃÂ½ÃÂ°ÃÂ»"
     },
     {
       "id": "other",
-      "name": "ÐÐ¸Ð³Ð°Ñ"
+      "name": "ÃÂÃÂ¸ÃÂ³ÃÂ°ÃÂ"
     }
   ],
-  "lastUpdate": "2026-03-17T12:44:42.770Z"
+  "lastUpdate": "2026-03-17T12:44:46.316Z"
 }
