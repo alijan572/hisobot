@@ -1404,7 +1404,7 @@
             localStorage.setItem('salesReports', JSON.stringify(reports));
             localStorage.setItem('expenseCategories', JSON.stringify(categories));
         }
-// Полная исправленная функция синхронизации
+// ИСПРАВЛЕННАЯ функция синхронизации
 async function syncWithGitHub() {
     const btn = document.getElementById('syncBtn');
     btn.classList.add('syncing');
@@ -1424,19 +1424,24 @@ async function syncWithGitHub() {
     showToast('Синхронизация...', 'info');
 
     try {
-        // Проверяем соединение с GitHub
-        const testResponse = await fetch('https://api.github.com/user', {
+        // Сначала проверим, существует ли репозиторий
+        const repoCheck = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}`, {
             headers: {
                 'Authorization': `token ${userToken}`,
                 'Accept': 'application/vnd.github.v3+json'
             }
         });
-        
-        if (!testResponse.ok) {
-            throw new Error('Токен недействителен');
+
+        if (!repoCheck.ok) {
+            if (repoCheck.status === 404) {
+                showToast('❌ Репозиторий hisobot не найден!', 'error');
+                throw new Error('Репозиторий не найден. Создайте его на GitHub');
+            } else {
+                throw new Error('Ошибка доступа к репозиторию');
+            }
         }
-        
-        // Пытаемся получить данные с GitHub
+
+        // Пытаемся получить данные
         const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
             headers: {
                 'Authorization': `token ${userToken}`,
@@ -1444,121 +1449,96 @@ async function syncWithGitHub() {
             }
         });
 
-        let githubReports = [];
-        let githubCategories = [];
-
         if (response.status === 404) {
-            // Файла нет - создадим новый
-            console.log('Файл data.json не найден, будет создан');
+            // Файла нет - создаём новый
+            console.log('Файл data.json будет создан');
+            
+            // Загружаем данные на GitHub
+            const dataToUpload = {
+                reports: reports,
+                categories: categories,
+                lastUpdate: new Date().toISOString()
+            };
+
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(dataToUpload, null, 2))));
+
+            const uploadResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${userToken}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/vnd.github.v3+json'
+                },
+                body: JSON.stringify({
+                    message: 'Initial data upload',
+                    content: content
+                })
+            });
+
+            if (uploadResponse.ok) {
+                showToast('✅ Файл создан и данные загружены!');
+            } else {
+                throw new Error('Не удалось создать файл');
+            }
         } else if (response.ok) {
             const data = await response.json();
-            // Проверяем, что data.content существует
-            if (data && data.content) {
-                try {
-                    const decoded = atob(data.content);
-                    const content = JSON.parse(decoded);
-                    githubReports = content.reports || [];
-                    githubCategories = content.categories || [];
-                } catch (parseError) {
-                    console.log('Ошибка парсинга JSON, файл будет перезаписан');
+            const content = JSON.parse(atob(data.content));
+            
+            // Объединяем reports
+            const allReports = [...reports];
+            content.reports.forEach(githubReport => {
+                if (!allReports.some(localReport => localReport.id === githubReport.id)) {
+                    allReports.push(githubReport);
                 }
+            });
+            reports = allReports;
+            
+            // Объединяем категории
+            const allCategories = [...categories];
+            content.categories.forEach(githubCat => {
+                if (!allCategories.some(localCat => localCat.id === githubCat.id)) {
+                    allCategories.push(githubCat);
+                }
+            });
+            categories = allCategories;
+            
+            saveData();
+            showToast('Данные загружены с GitHub!');
+            
+            // Загружаем обновлённые данные обратно
+            const dataToUpload = {
+                reports: reports,
+                categories: categories,
+                lastUpdate: new Date().toISOString()
+            };
+
+            const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(dataToUpload, null, 2))));
+
+            const uploadResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${userToken}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/vnd.github.v3+json'
+                },
+                body: JSON.stringify({
+                    message: 'Sync data from app',
+                    content: newContent,
+                    sha: data.sha
+                })
+            });
+
+            if (uploadResponse.ok) {
+                showToast('✅ Синхронизация успешна!');
+                updateHistory();
+                updateMonthlyReport();
             }
-        } else {
-            throw new Error('Ошибка при получении данных');
-        }
-
-        // ОБЪЕДИНЯЕМ reports
-        const mergedReports = [];
-        const allIds = new Set();
-        
-        // Сначала добавляем все GitHub reports
-        githubReports.forEach(r => {
-            mergedReports.push(r);
-            allIds.add(r.id);
-        });
-        
-        // Добавляем локальные, которых нет в GitHub
-        reports.forEach(r => {
-            if (!allIds.has(r.id)) {
-                mergedReports.push(r);
-            }
-        });
-        
-        reports = mergedReports;
-        
-        // Объединяем категории
-        const mergedCategories = [];
-        const catIds = new Set();
-        
-        githubCategories.forEach(c => {
-            mergedCategories.push(c);
-            catIds.add(c.id);
-        });
-        
-        categories.forEach(c => {
-            if (!catIds.has(c.id)) {
-                mergedCategories.push(c);
-            }
-        });
-        
-        categories = mergedCategories;
-        
-        saveData();
-        showToast('Данные получены с GitHub!');
-
-        // ЗАГРУЖАЕМ данные на GitHub
-        const dataToUpload = {
-            reports: reports,
-            categories: categories,
-            lastUpdate: new Date().toISOString()
-        };
-
-        const content = btoa(unescape(encodeURIComponent(JSON.stringify(dataToUpload, null, 2))));
-
-        // Получаем текущий файл для sha
-        const shaResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
-            headers: {
-                'Authorization': `token ${userToken}`,
-                'Accept': 'application/vnd.github.v3+json'
-            }
-        });
-
-        let sha = null;
-        if (shaResponse.ok) {
-            const data = await shaResponse.json();
-            sha = data.sha;
-        }
-
-        // Загружаем
-        const uploadResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `token ${userToken}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/vnd.github.v3+json'
-            },
-            body: JSON.stringify({
-                message: 'Sync data from app',
-                content: content,
-                sha: sha
-            })
-        });
-
-        if (uploadResponse.ok) {
-            showToast('✅ Синхронизация успешна!');
-            updateHistory();
-            updateMonthlyReport();
-        } else {
-            const error = await uploadResponse.json();
-            throw new Error(error.message || 'Ошибка загрузки');
         }
 
     } catch (error) {
         console.error('Sync error:', error);
-        showToast('❌ Ошибка синхронизации: ' + error.message, 'error');
-        if (error.message.includes('токен') || error.message.includes('token')) {
-            localStorage.removeItem('github_token');
-        }
+        showToast('❌ ' + error.message, 'error');
+        localStorage.removeItem('github_token');
     } finally {
         btn.classList.remove('syncing');
     }
