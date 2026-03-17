@@ -250,6 +250,18 @@
             color: white;
         }
 
+        /* Стиль для кнопки "Ба менюи асосӣ" */
+        .btn-home {
+            background: linear-gradient(135deg, var(--accent-blue) 0%, #1e3a8a 100%);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+        }
+
         #continueBtn {
             margin-top: 20px;
             opacity: 0;
@@ -1226,6 +1238,10 @@
                 <button class="btn btn-primary" onclick="saveDay()">
                     💾 ЗАВЕРШИТЬ
                 </button>
+                <!-- КНОПКА ВОЗВРАТА В ГЛАВНОЕ МЕНЮ -->
+                <button class="btn btn-home" onclick="goToMainMenu()">
+                    🏠 БА МЕНЮИ АСОСӢ
+                </button>
             </div>
         </div>
 
@@ -1293,6 +1309,12 @@
                     <tbody id="categoryTable"></tbody>
                 </table>
             </div>
+
+            <!-- КНОПКА ВОЗВРАТА В ГЛАВНОЕ МЕНЮ -->
+            <button class="btn btn-home" onclick="goToMainMenu()" style="margin-bottom: 16px;">
+                🏠 БА МЕНЮИ АСОСӢ
+            </button>
+            <button class="btn btn-secondary" id="backFromMonthlyBtn">БА АҚИБ</button>
         </div>
 
         <!-- History Screen -->
@@ -1312,6 +1334,12 @@
             </div>
 
             <div id="historyList"></div>
+
+            <!-- КНОПКА ВОЗВРАТА В ГЛАВНОЕ МЕНЮ -->
+            <button class="btn btn-home" onclick="goToMainMenu()" style="margin-bottom: 16px;">
+                🏠 БА МЕНЮИ АСОСӢ
+            </button>
+            <button class="btn btn-secondary" id="backFromHistoryBtn">БА АҚИБ</button>
         </div>
     </div>
 
@@ -1405,6 +1433,28 @@
         function saveData() {
             localStorage.setItem('salesReports', JSON.stringify(reports));
             localStorage.setItem('expenseCategories', JSON.stringify(categories));
+        }
+
+        // Функция для возврата в главное меню
+        function goToMainMenu() {
+            // Сбрасываем выбранный магазин
+            selectedStore = null;
+            
+            // Показываем экран выбора магазина
+            showScreen('storeScreen');
+            
+            // Скрываем навигационную панель
+            document.getElementById('navBar').style.display = 'none';
+            
+            // Убираем выделение с карточек магазинов
+            document.querySelectorAll('.store-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Скрываем кнопку "Идома"
+            document.getElementById('continueBtn').classList.remove('visible');
+            
+            showToast('Ба менюи асосӣ гузаштед');
         }
 
         // ИСПРАВЛЕННАЯ СИНХРОНИЗАЦИЯ - теперь всё работает правильно
@@ -1807,6 +1857,7 @@ async function deleteReport(id) {
             document.getElementById('cash').value = cash;
             calculateTotals();
         }
+
 function getPreviousBalances() {
     const date = document.getElementById('reportDate').value;
     const store = selectedStore || document.getElementById('selectedStore').textContent;
@@ -2305,4 +2356,3 @@ function getPreviousBalances() {
     </script>
 </body>
 </html>
-
