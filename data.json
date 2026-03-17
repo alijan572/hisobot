@@ -1,0 +1,49 @@
+{
+  "reports": [
+    {
+      "id": 1773754691619,
+      "date": "2026-03-01",
+      "store": "F-1",
+      "adminName": "Сироч",
+      "totalCheck": 70000,
+      "cashless": 50000,
+      "cash": 20000,
+      "returnCash": 0,
+      "returnCashless": 0,
+      "expenses": [],
+      "receiptImage": null,
+      "totalSales": 70000,
+      "totalReturns": 0,
+      "totalExpenses": 0,
+      "safeCash": 41880,
+      "safeCashless": 530215
+    }
+  ],
+  "categories": [
+    {
+      "id": "products",
+      "name": "Маҳсулот"
+    },
+    {
+      "id": "salary",
+      "name": "Музд"
+    },
+    {
+      "id": "rent",
+      "name": "Иҷора"
+    },
+    {
+      "id": "utilities",
+      "name": "Коммунал"
+    },
+    {
+      "id": "other",
+      "name": "Дигар"
+    },
+    {
+      "id": "cat_1773754467209",
+      "name": "сирочиддин"
+    }
+  ],
+  "lastUpdate": "2026-03-17T13:50:53.463Z"
+}
