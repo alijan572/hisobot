@@ -1807,28 +1807,32 @@ async function deleteReport(id) {
             document.getElementById('cash').value = cash;
             calculateTotals();
         }
-
-        function getPreviousBalances() {
-            const date = document.getElementById('reportDate').value;
-            const store = selectedStore || document.getElementById('selectedStore').textContent;
-            
-            if (!date || !store) return { cash: 0, cashless: 0 };
-            
-            const prevDate = new Date(date);
-            prevDate.setDate(prevDate.getDate() - 1);
-            const prevDateStr = prevDate.toISOString().split('T')[0];
-            
-            const prevReport = reports.find(r => r.date === prevDateStr && r.store === store);
-            
-            if (prevReport) {
-                return {
-                    cash: prevReport.safeCash || 0,
-                    cashless: prevReport.safeCashless || 0
-                };
-            }
-            
-            return { cash: 21880, cashless: 480215 };
-        }
+function getPreviousBalances() {
+    const date = document.getElementById('reportDate').value;
+    const store = selectedStore || document.getElementById('selectedStore').textContent;
+    
+    if (!date || !store) return { cash: 0, cashless: 0 };
+    
+    const prevDate = new Date(date);
+    prevDate.setDate(prevDate.getDate() - 1);
+    const prevDateStr = prevDate.toISOString().split('T')[0];
+    
+    const prevReport = reports.find(r => r.date === prevDateStr && r.store === store);
+    
+    if (prevReport) {
+        return {
+            cash: prevReport.safeCash || 0,
+            cashless: prevReport.safeCashless || 0
+        };
+    }
+    
+    // Новые начальные данные для каждого магазина
+    if (store === 'F-1') return { cash: 8384, cashless: 434925 };
+    if (store === 'F-5') return { cash: 51771, cashless: 489288 };
+    if (store === 'F-7') return { cash: 138070, cashless: 224314 };
+    
+    return { cash: 0, cashless: 0 };
+}
 
         function getCategoryName(categoryId) {
             const cat = categories.find(c => c.id === categoryId);
