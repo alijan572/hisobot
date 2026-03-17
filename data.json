@@ -1,49 +1,30 @@
 {
-  "reports": [
-    {
-      "id": 1773754691619,
-      "date": "2026-03-01",
-      "store": "F-1",
-      "adminName": "Сироч",
-      "totalCheck": 70000,
-      "cashless": 50000,
-      "cash": 20000,
-      "returnCash": 0,
-      "returnCashless": 0,
-      "expenses": [],
-      "receiptImage": null,
-      "totalSales": 70000,
-      "totalReturns": 0,
-      "totalExpenses": 0,
-      "safeCash": 41880,
-      "safeCashless": 530215
-    }
-  ],
+  "reports": [],
   "categories": [
     {
       "id": "products",
-      "name": "Маҳсулот"
+      "name": "ÐÐ°Ò³ÑÑÐ»Ð¾Ñ"
     },
     {
       "id": "salary",
-      "name": "Музд"
+      "name": "ÐÑÐ·Ð´"
     },
     {
       "id": "rent",
-      "name": "Иҷора"
+      "name": "ÐÒ·Ð¾ÑÐ°"
     },
     {
       "id": "utilities",
-      "name": "Коммунал"
+      "name": "ÐÐ¾Ð¼Ð¼ÑÐ½Ð°Ð»"
     },
     {
       "id": "other",
-      "name": "Дигар"
+      "name": "ÐÐ¸Ð³Ð°Ñ"
     },
     {
       "id": "cat_1773754467209",
-      "name": "сирочиддин"
+      "name": "ÑÐ¸ÑÐ¾ÑÐ¸Ð´Ð´Ð¸Ð½"
     }
   ],
-  "lastUpdate": "2026-03-17T13:50:53.463Z"
+  "lastUpdate": "2026-03-17T13:51:00.660Z"
 }
