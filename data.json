@@ -4,7 +4,7 @@
       "id": 1773853761872,
       "date": "2026-03-17",
       "store": "F-1",
-      "adminName": "ÃÂ¡ÃÂ°ÃÂ¹ÃÂ´ÃÂ°ÃÂÃÂÃÂ°ÃÂ",
+      "adminName": "Сайдашраф",
       "totalCheck": 43561,
       "cashless": 19061,
       "cash": 24500,
@@ -36,41 +36,59 @@
       "totalExpenses": 2000,
       "safeCash": 30884,
       "safeCashless": 453986
+    },
+    {
+      "id": 1773853870470,
+      "date": "2026-03-18",
+      "store": "F-5",
+      "adminName": "Ахмад",
+      "totalCheck": 22719,
+      "cashless": 12970,
+      "cash": 9749,
+      "returnCash": 0,
+      "returnCashless": 0,
+      "expenses": [],
+      "receiptImage": null,
+      "totalSales": 22719,
+      "totalReturns": 0,
+      "totalExpenses": 0,
+      "safeCash": 61520,
+      "safeCashless": 502258
     }
   ],
   "categories": [
     {
       "id": "products",
-      "name": "ÐÐ°Ò³ÑÑÐ»Ð¾Ñ"
+      "name": "Маҳсулот"
     },
     {
       "id": "salary",
-      "name": "ÐÑÐ·Ð´"
+      "name": "Музд"
     },
     {
       "id": "rent",
-      "name": "ÐÒ·Ð¾ÑÐ°"
+      "name": "Иҷора"
     },
     {
       "id": "utilities",
-      "name": "ÐÐ¾Ð¼Ð¼ÑÐ½Ð°Ð»"
+      "name": "Коммунал"
     },
     {
       "id": "other",
-      "name": "ÐÐ¸Ð³Ð°Ñ"
+      "name": "Дигар"
     },
     {
       "id": "cat_1773853644655",
-      "name": "ÃÂ ÃÂ°ÃÂÃÂ¿ÃÂÃÂ»ÃÂ¸"
+      "name": "Рахпули"
     },
     {
       "id": "cat_1773853659474",
-      "name": "ÃÂ¡ÃÂ°ÃÂ¹ÃÂ´ÃÂ°ÃÂÃÂÃÂ°ÃÂ"
+      "name": "Сайдашраф"
     },
     {
       "id": "cat_1773853672988",
-      "name": "ÃÂÃÂÃÂÃÂ¾ÃÂÃÂ¸ ÃÂ±ÃÂ°ÃÂÃÂ°ÃÂÃÂ¾"
+      "name": "Ифтори бачахо"
     }
   ],
-  "lastUpdate": "2026-03-18T17:12:49.686Z"
+  "lastUpdate": "2026-03-18T17:13:30.103Z"
 }
