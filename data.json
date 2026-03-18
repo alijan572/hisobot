@@ -1,5 +1,43 @@
 {
-  "reports": [],
+  "reports": [
+    {
+      "id": 1773853761872,
+      "date": "2026-03-17",
+      "store": "F-1",
+      "adminName": "Сайдашраф",
+      "totalCheck": 43561,
+      "cashless": 19061,
+      "cash": 24500,
+      "returnCash": 0,
+      "returnCashless": 0,
+      "expenses": [
+        {
+          "id": 1773853674354,
+          "type": "cash",
+          "category": "cat_1773853644655",
+          "amount": 500
+        },
+        {
+          "id": 1773853683256,
+          "type": "cash",
+          "category": "cat_1773853659474",
+          "amount": 500
+        },
+        {
+          "id": 1773853702368,
+          "type": "cash",
+          "category": "cat_1773853672988",
+          "amount": 1000
+        }
+      ],
+      "receiptImage": null,
+      "totalSales": 43561,
+      "totalReturns": 0,
+      "totalExpenses": 2000,
+      "safeCash": 30884,
+      "safeCashless": 453986
+    }
+  ],
   "categories": [
     {
       "id": "products",
@@ -20,7 +58,19 @@
     {
       "id": "other",
       "name": "Дигар"
+    },
+    {
+      "id": "cat_1773853644655",
+      "name": "Рахпули"
+    },
+    {
+      "id": "cat_1773853659474",
+      "name": "Сайдашраф"
+    },
+    {
+      "id": "cat_1773853672988",
+      "name": "Ифтори бачахо"
     }
   ],
-  "lastUpdate": "2026-03-18T17:04:37.453Z"
+  "lastUpdate": "2026-03-18T17:09:38.455Z"
 }
