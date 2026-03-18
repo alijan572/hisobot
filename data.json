@@ -36,6 +36,24 @@
       "totalExpenses": 2000,
       "safeCash": 30884,
       "safeCashless": 453986
+    },
+    {
+      "id": 1773854149903,
+      "date": "2026-03-17",
+      "store": "F-5",
+      "adminName": "Ахмад",
+      "totalCheck": 22719,
+      "cashless": 12970,
+      "cash": 9749,
+      "returnCash": 0,
+      "returnCashless": 0,
+      "expenses": [],
+      "receiptImage": null,
+      "totalSales": 22719,
+      "totalReturns": 0,
+      "totalExpenses": 0,
+      "safeCash": 61520,
+      "safeCashless": 502258
     }
   ],
   "categories": [
@@ -72,5 +90,5 @@
       "name": "Ифтори бачахо"
     }
   ],
-  "lastUpdate": "2026-03-18T17:13:45.816Z"
+  "lastUpdate": "2026-03-18T17:15:50.661Z"
 }
