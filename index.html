@@ -807,12 +807,12 @@
             <div class="step-content">
                 <div class="step-title">📉 Харҷҳо</div>
                 <div class="categories-section">
-                    <div class="categories-header"><div class="input-label">Категорияҳо</div><button class="btn-purple" style="padding:8px 14px;font-size:13px;width:auto;" onclick="toggleStepCategoryForm()">+ Категория</button></div>
-                    <div id="stepCategoryForm" style="display:none;" class="add-category-form"><input type="text" id="stepNewCategoryName" placeholder="Номи категория"><button onclick="addStepCategory()">Илова</button></div>
-                    <div class="categories-list" id="stepCategoriesList"></div>
+                    <div class="categories-header"><div class="input-label">Категорияҳо</div><button class="btn-purple" style="padding:8px 14px;font-size:13px;width:auto;" onclick="toggleCategoryForm()">+ Категория</button></div>
+                    <div id="categoryForm" style="display:none;" class="add-category-form"><input type="text" id="newCategoryName" placeholder="Номи категория"><button onclick="addCategory()">Илова</button></div>
+                    <div class="categories-list" id="categoriesList"></div>
                 </div>
-                <div id="stepExpensesList"></div>
-                <div class="add-expense-btn" onclick="addStepExpense()">+ Иловаи харҷ</div>
+                <div id="expensesList"></div>
+                <div class="add-expense-btn" onclick="addExpense()">+ Иловаи харҷ</div>
             </div>
             <div class="btn-nav"><button class="btn btn-secondary" onclick="prevStep(3)">← Ба ақиб</button><button class="btn btn-primary" onclick="nextStep(4)">Давом →</button></div>
         </div>
@@ -822,11 +822,11 @@
             <div class="progress-bar"><div class="progress-step completed">1</div><div class="progress-step completed">2</div><div class="progress-step completed">3</div><div class="progress-step completed">4</div><div class="progress-step active">5</div></div>
             <div class="step-content">
                 <div class="step-title">📊 Натиҷаи рӯз</div>
-                <div class="summary-block" id="stepSummaryBlock">
+                <div class="summary-block" id="summaryBlock">
                     <div class="summary-header">
-                        <span id="stepSummaryShop">F-1</span>
-                        <span id="stepSummaryDate">16.03.2026</span>
-                        <span id="stepSummaryAdmin">Админ</span>
+                        <span id="summaryShop">F-1</span>
+                        <span id="summaryDate">16.03.2026</span>
+                        <span id="summaryAdmin">Админ</span>
                     </div>
 
                     <!-- Боқияи дирӯза -->
@@ -834,37 +834,37 @@
                         <div style="color: var(--accent-blue); font-weight: 600; margin-bottom: 8px;">📦 БОҚИЯИ ДИРӮЗА ДАР СЕЙФ</div>
                         <div style="display: flex; justify-content: space-between; padding: 4px 0;">
                             <span class="label">НАҚД</span>
-                            <span class="value" id="stepSafeCash">0 ₽</span>
+                            <span class="value" id="safeCash">0 ₽</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; padding: 4px 0;">
                             <span class="label">БЕЗНАЛ</span>
-                            <span class="value" id="stepSafeCashless">0 ₽</span>
+                            <span class="value" id="safeCashless">0 ₽</span>
                         </div>
                     </div>
 
-                    <div class="summary-row"><span class="label">ФУРӮШИ УМУМӢ</span><span class="value" id="stepSummaryTotal">0 ₽</span></div>
-                    <div class="summary-row"><span class="label">НАҚДИ ИМРӮЗА</span><span class="value" id="stepSummaryCash">0 ₽</span></div>
-                    <div class="summary-row"><span class="label">БЕЗНАЛИ ИМРӮЗА</span><span class="value" id="stepSummaryCashless">0 ₽</span></div>
-                    <div class="summary-row"><span class="label">ВОЗГАРДОНИ НАҚД</span><span class="value" id="stepSummaryReturnCash">0 ₽</span></div>
-                    <div class="summary-row"><span class="label">ВОЗГАРДОНИ БЕЗНАЛ</span><span class="value" id="stepSummaryReturnCashless">0 ₽</span></div>
+                    <div class="summary-row"><span class="label">ФУРӮШИ УМУМӢ</span><span class="value" id="summaryTotal">0 ₽</span></div>
+                    <div class="summary-row"><span class="label">НАҚДИ ИМРӮЗА</span><span class="value" id="summaryCash">0 ₽</span></div>
+                    <div class="summary-row"><span class="label">БЕЗНАЛИ ИМРӮЗА</span><span class="value" id="summaryCashless">0 ₽</span></div>
+                    <div class="summary-row"><span class="label">ВОЗГАРДОНИ НАҚД</span><span class="value" id="summaryReturnCash">0 ₽</span></div>
+                    <div class="summary-row"><span class="label">ВОЗГАРДОНИ БЕЗНАЛ</span><span class="value" id="summaryReturnCashless">0 ₽</span></div>
 
-                    <div class="expenses-summary" id="stepExpensesSummary">
+                    <div class="expenses-summary" id="expensesSummary">
                         <div class="expenses-summary-title">ХАРОҶОТ</div>
-                        <div id="stepSummaryExpensesList"></div>
+                        <div id="summaryExpensesList"></div>
                     </div>
 
                     <div class="safe-summary">
-                        <div class="safe-summary-item"><span class="label">НАҚД ДАР СЕЙФ (пас аз рӯз)</span><span class="value" id="stepSummarySafeCash">0 ₽</span></div>
-                        <div class="safe-summary-item"><span class="label">БЕЗНАЛ ДАР СЕЙФ (пас аз рӯз)</span><span class="value" id="stepSummarySafeCashless">0 ₽</span></div>
+                        <div class="safe-summary-item"><span class="label">НАҚД ДАР СЕЙФ (пас аз рӯз)</span><span class="value" id="summarySafeCash">0 ₽</span></div>
+                        <div class="safe-summary-item"><span class="label">БЕЗНАЛ ДАР СЕЙФ (пас аз рӯз)</span><span class="value" id="summarySafeCashless">0 ₽</span></div>
                     </div>
                 </div>
             </div>
             <div class="btn-nav" style="flex-direction:column; gap:10px;">
                 <div style="display:flex; gap:10px; width:100%;">
                     <button class="btn btn-secondary" onclick="prevStep(4)" style="flex:1;">← Ба ақиб</button>
-                    <button class="btn btn-pdf" onclick="shareStepPDF()" style="flex:1;">📤 Фиристодан</button>
+                    <button class="btn btn-pdf" onclick="sharePDF()" style="flex:1;">📤 Фиристодан</button>
                 </div>
-                <button class="btn btn-success" onclick="saveStepDay()">💾 ТАСДИҚ</button>
+                <button class="btn btn-success" onclick="saveDay()">💾 ТАСДИҚ</button>
             </div>
         </div>
 
@@ -909,15 +909,19 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // 🔥 FIREBASE КОНФИГУРАЦИЯ
-        firebase.initializeApp({
-            apiKey: "AIzaSyDqDs4QxH0jhtFvFqtR20b5lbRKGAyQV6U",
-            authDomain: "hisobot-app-914ce.firebaseapp.com",
-            projectId: "hisobot-app-914ce",
-            storageBucket: "hisobot-app-914ce.firebasestorage.app",
-            messagingSenderId: "306527113905",
-            appId: "1:306527113905:web:58c93a7a850a8403d04890"
-        });
+        // 🔥 ВСТАВЬ СВОИ НОВЫЕ КЛЮЧИ СЮДА!
+        const firebaseConfig = {
+  apiKey: "AIzaSyAicdvSy3IoaqkLUJhZNCBjEFGOO5Nyu0o",
+  authDomain: "hisobot-new.firebaseapp.com",
+  projectId: "hisobot-new",
+  storageBucket: "hisobot-new.firebasestorage.app",
+  messagingSenderId: "341893612700",
+  appId: "1:341893612700:web:6e9f4873cbb30f60491959"
+};
+
+
+        // Инициализация Firebase
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         // ============================================
@@ -933,42 +937,40 @@
         let hasReturn = false;
 
         // ============================================
-        // ЗАГРУЗКА КАТЕГОРИЙ ИЗ FIREBASE
+        // ЗАГРУЗКА КАТЕГОРИЙ
         // ============================================
         async function loadCategories() {
             const snapshot = await db.collection('categories').get();
-            if (!snapshot.empty) {
-                categories = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
-            } else {
-                // Если категорий нет, создаём базовые
-                const baseCategories = [
+            if (snapshot.empty) {
+                // Создаём базовые категории
+                const baseCats = [
                     { id: 'products', name: 'Маҳсулот' },
                     { id: 'salary', name: 'Музд' },
                     { id: 'rent', name: 'Иҷора' },
                     { id: 'utilities', name: 'Коммунал' },
                     { id: 'other', name: 'Дигар' }
                 ];
-                for (let cat of baseCategories) {
+                for (let cat of baseCats) {
                     await db.collection('categories').doc(cat.id).set({ name: cat.name });
                 }
-                categories = baseCategories;
+                categories = baseCats;
+            } else {
+                categories = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
             }
-            renderStepCategories();
+            renderCategories();
         }
 
         // ============================================
-        // ПОДПИСКА НА ИЗМЕНЕНИЯ В FIREBASE
+        // ПОДПИСКА НА ОТЧЁТЫ
         // ============================================
         db.collection('reports').onSnapshot(snapshot => {
             reports = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            if (document.getElementById('monthlyReportScreen').classList.contains('active')) updateMonthlyReport();
-            if (document.getElementById('historyScreen').classList.contains('active')) updateHistory();
-        });
-
-        // Подписка на изменения категорий
-        db.collection('categories').onSnapshot(snapshot => {
-            categories = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
-            renderStepCategories();
+            if (document.getElementById('monthlyReportScreen').classList.contains('active')) {
+                updateMonthlyReport();
+            }
+            if (document.getElementById('historyScreen').classList.contains('active')) {
+                updateHistory();
+            }
         });
 
         // ============================================
@@ -1000,12 +1002,12 @@
             if (!selectedStore) return;
             resetStepData();
             document.getElementById('stepStore').textContent = selectedStore;
-            document.getElementById('stepSummaryShop').textContent = selectedStore;
+            document.getElementById('summaryShop').textContent = selectedStore;
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('stepDate').value = today;
             updateStepDate();
             
-            // Загружаем остатки прошлого дня
+            // Загружаем остатки
             const prevDate = new Date(today);
             prevDate.setDate(prevDate.getDate() - 1);
             const prevId = `${selectedStore}_${prevDate.toISOString().split('T')[0]}`;
@@ -1013,19 +1015,18 @@
             db.collection('reports').doc(prevId).get().then(doc => {
                 if (doc.exists) {
                     const data = doc.data();
-                    document.getElementById('stepSafeCash').textContent = formatMoney(data.safeCash || 0);
-                    document.getElementById('stepSafeCashless').textContent = formatMoney(data.safeCashless || 0);
+                    document.getElementById('safeCash').textContent = formatMoney(data.safeCash || 0);
+                    document.getElementById('safeCashless').textContent = formatMoney(data.safeCashless || 0);
                 } else {
-                    // Начальные данные
                     if (selectedStore === 'F-1') {
-                        document.getElementById('stepSafeCash').textContent = formatMoney(8384);
-                        document.getElementById('stepSafeCashless').textContent = formatMoney(434925);
+                        document.getElementById('safeCash').textContent = formatMoney(8384);
+                        document.getElementById('safeCashless').textContent = formatMoney(434925);
                     } else if (selectedStore === 'F-5') {
-                        document.getElementById('stepSafeCash').textContent = formatMoney(51771);
-                        document.getElementById('stepSafeCashless').textContent = formatMoney(489288);
+                        document.getElementById('safeCash').textContent = formatMoney(51771);
+                        document.getElementById('safeCashless').textContent = formatMoney(489288);
                     } else if (selectedStore === 'F-7') {
-                        document.getElementById('stepSafeCash').textContent = formatMoney(138070);
-                        document.getElementById('stepSafeCashless').textContent = formatMoney(224314);
+                        document.getElementById('safeCash').textContent = formatMoney(138070);
+                        document.getElementById('safeCashless').textContent = formatMoney(224314);
                     }
                 }
             });
@@ -1035,26 +1036,16 @@
         }
 
         // ============================================
-        // ФУНКЦИИ ШАГОВ
+        // ШАГ 1
         // ============================================
-        function resetStepData() {
-            stepExpenses = []; stepReceiptImage = null; hasReturn = false;
-            document.getElementById('stepTotal').value = '';
-            document.getElementById('stepCashless').value = '';
-            document.getElementById('stepCash').value = '';
-            document.getElementById('stepReturnCash').value = '';
-            document.getElementById('stepReturnCashless').value = '';
-            document.getElementById('stepAdmin').value = '';
-            document.getElementById('returnFields').classList.remove('show');
-            document.getElementById('stepUploadContent').innerHTML = '<div class="upload-icon">📷</div><div class="upload-text">Акси чекро прикреп кунед</div>';
-            renderStepExpenses();
-        }
-
         function updateStepDate() {
             const d = document.getElementById('stepDate').value.split('-');
-            if (d.length === 3) document.getElementById('stepSummaryDate').textContent = `${d[2]}.${d[1]}.${d[0]}`;
+            if (d.length === 3) document.getElementById('summaryDate').textContent = `${d[2]}.${d[1]}.${d[0]}`;
         }
 
+        // ============================================
+        // ШАГ 2
+        // ============================================
         function calculateStepCash() {
             const total = parseFloat(document.getElementById('stepTotal').value) || 0;
             const cashless = parseFloat(document.getElementById('stepCashless').value) || 0;
@@ -1073,6 +1064,9 @@
             reader.readAsDataURL(file);
         }
 
+        // ============================================
+        // ШАГ 3
+        // ============================================
         function showReturnFields(yes) {
             hasReturn = yes;
             document.getElementById('returnFields').classList.toggle('show', yes);
@@ -1082,21 +1076,24 @@
             }
         }
 
-        function renderStepCategories() {
-            const container = document.getElementById('stepCategoriesList');
+        // ============================================
+        // КАТЕГОРИИ
+        // ============================================
+        function renderCategories() {
+            const container = document.getElementById('categoriesList');
             if (!container) return;
             container.innerHTML = categories.map(cat => 
-                `<div class="category-tag ${selectedCategory === cat.id ? 'selected' : ''}" onclick="selectStepCategory('${cat.id}')">${cat.name}<span class="remove-cat" onclick="event.stopPropagation(); removeStepCategory('${cat.id}')">×</span></div>`
+                `<div class="category-tag ${selectedCategory === cat.id ? 'selected' : ''}" onclick="selectCategory('${cat.id}')">${cat.name}<span class="remove-cat" onclick="event.stopPropagation(); removeCategory('${cat.id}')">×</span></div>`
             ).join('');
         }
 
-        function toggleStepCategoryForm() {
-            const f = document.getElementById('stepCategoryForm');
+        function toggleCategoryForm() {
+            const f = document.getElementById('categoryForm');
             f.style.display = f.style.display === 'none' ? 'flex' : 'none';
         }
 
-        async function addStepCategory() {
-            const inp = document.getElementById('stepNewCategoryName');
+        async function addCategory() {
+            const inp = document.getElementById('newCategoryName');
             const name = inp.value.trim();
             if (!name) { showToast('Номи категорияро ворид кунед'); return; }
             
@@ -1105,13 +1102,13 @@
                 await db.collection('categories').doc(newId).set({ name });
                 showToast('Категория илова шуд');
                 inp.value = '';
-                toggleStepCategoryForm();
+                toggleCategoryForm();
             } catch (error) {
-                showToast('❌ Хато ҳангоми илова', 'error');
+                showToast('❌ Хато', 'error');
             }
         }
 
-        async function removeStepCategory(id) {
+        async function removeCategory(id) {
             if (stepExpenses.some(e => e.category === id)) { 
                 showToast('Ин категория дар харҷҳо истифода шудааст'); 
                 return; 
@@ -1126,49 +1123,58 @@
                 if (selectedCategory === id) selectedCategory = null;
                 showToast('Категория нест шуд');
             } catch (error) {
-                showToast('❌ Хато ҳангоми нест кардан', 'error');
+                showToast('❌ Хато', 'error');
             }
         }
 
-        function selectStepCategory(id) {
+        function selectCategory(id) {
             selectedCategory = selectedCategory === id ? null : id;
-            renderStepCategories();
+            renderCategories();
         }
 
-        function addStepExpense() {
+        // ============================================
+        // РАСХОДЫ
+        // ============================================
+        function addExpense() {
             stepExpenses.push({ id: Date.now(), type: 'cash', category: selectedCategory || 'other', amount: 0 });
-            renderStepExpenses();
+            renderExpenses();
         }
-        function removeStepExpense(id) {
+
+        function removeExpense(id) {
             stepExpenses = stepExpenses.filter(e => e.id !== id);
-            renderStepExpenses();
+            renderExpenses();
         }
-        function updateStepExpense(id, field, value) {
+
+        function updateExpense(id, field, value) {
             const exp = stepExpenses.find(e => e.id === id);
             if (exp) exp[field] = field === 'amount' ? (parseFloat(value) || 0) : value;
         }
-        function renderStepExpenses() {
-            const container = document.getElementById('stepExpensesList');
+
+        function renderExpenses() {
+            const container = document.getElementById('expensesList');
             if (!stepExpenses.length) { container.innerHTML = ''; return; }
             container.innerHTML = stepExpenses.map(exp => {
                 const opts = categories.map(c => `<option value="${c.id}" ${exp.category===c.id?'selected':''}>${c.name}</option>`).join('');
                 return `<div class="expense-item">
-                    <select onchange="updateStepExpense(${exp.id}, 'type', this.value)"><option value="cash" ${exp.type==='cash'?'selected':''}>НАҚД</option><option value="cashless" ${exp.type==='cashless'?'selected':''}>БЕЗНАЛ</option></select>
-                    <select onchange="updateStepExpense(${exp.id}, 'category', this.value)">${opts}</select>
-                    <input type="number" placeholder="0" value="${exp.amount||''}" onchange="updateStepExpense(${exp.id}, 'amount', this.value)">
-                    <button onclick="removeStepExpense(${exp.id})">🗑</button>
+                    <select onchange="updateExpense(${exp.id}, 'type', this.value)"><option value="cash" ${exp.type==='cash'?'selected':''}>НАҚД</option><option value="cashless" ${exp.type==='cashless'?'selected':''}>БЕЗНАЛ</option></select>
+                    <select onchange="updateExpense(${exp.id}, 'category', this.value)">${opts}</select>
+                    <input type="number" placeholder="0" value="${exp.amount||''}" onchange="updateExpense(${exp.id}, 'amount', this.value)">
+                    <button onclick="removeExpense(${exp.id})">🗑</button>
                 </div>`;
             }).join('');
         }
 
-        function calculateStepTotals() {
+        // ============================================
+        // РАСЧЁТЫ
+        // ============================================
+        function calculateTotals() {
             const total = parseFloat(document.getElementById('stepTotal').value) || 0;
             const cash = parseFloat(document.getElementById('stepCash').value) || 0;
             const cashless = parseFloat(document.getElementById('stepCashless').value) || 0;
             const returnCash = hasReturn ? (parseFloat(document.getElementById('stepReturnCash').value) || 0) : 0;
             const returnCashless = hasReturn ? (parseFloat(document.getElementById('stepReturnCashless').value) || 0) : 0;
-            const safeCash = parseInt(document.getElementById('stepSafeCash').textContent.replace(/[^\d]/g,'')) || 0;
-            const safeCashless = parseInt(document.getElementById('stepSafeCashless').textContent.replace(/[^\d]/g,'')) || 0;
+            const safeCash = parseInt(document.getElementById('safeCash').textContent.replace(/[^\d]/g,'')) || 0;
+            const safeCashless = parseInt(document.getElementById('safeCashless').textContent.replace(/[^\d]/g,'')) || 0;
             
             let expenseCash = 0, expenseCashless = 0;
             stepExpenses.forEach(e => { if (e.amount) { if (e.type==='cash') expenseCash+=e.amount; else expenseCashless+=e.amount; } });
@@ -1176,13 +1182,13 @@
             const finalCash = Math.max(0, safeCash + cash - expenseCash - returnCash);
             const finalCashless = Math.max(0, safeCashless + cashless - expenseCashless - returnCashless);
             
-            document.getElementById('stepSummaryTotal').textContent = formatMoney(total);
-            document.getElementById('stepSummaryCash').textContent = formatMoney(cash);
-            document.getElementById('stepSummaryCashless').textContent = formatMoney(cashless);
-            document.getElementById('stepSummaryReturnCash').textContent = formatMoney(returnCash);
-            document.getElementById('stepSummaryReturnCashless').textContent = formatMoney(returnCashless);
-            document.getElementById('stepSummarySafeCash').textContent = formatMoney(finalCash);
-            document.getElementById('stepSummarySafeCashless').textContent = formatMoney(finalCashless);
+            document.getElementById('summaryTotal').textContent = formatMoney(total);
+            document.getElementById('summaryCash').textContent = formatMoney(cash);
+            document.getElementById('summaryCashless').textContent = formatMoney(cashless);
+            document.getElementById('summaryReturnCash').textContent = formatMoney(returnCash);
+            document.getElementById('summaryReturnCashless').textContent = formatMoney(returnCashless);
+            document.getElementById('summarySafeCash').textContent = formatMoney(finalCash);
+            document.getElementById('summarySafeCashless').textContent = formatMoney(finalCashless);
             
             let html = '';
             stepExpenses.forEach(e => {
@@ -1191,10 +1197,10 @@
                     html += `<div class="expense-summary-item"><span>${cat ? cat.name : e.category} (${e.type==='cash'?'НАҚД':'БЕЗНАЛ'})</span><span class="expense-summary-amount">${formatMoney(e.amount)}</span></div>`;
                 }
             });
-            document.getElementById('stepSummaryExpensesList').innerHTML = html || '<div class="expense-summary-item">Харҷ нест</div>';
+            document.getElementById('summaryExpensesList').innerHTML = html || '<div class="expense-summary-item">Харҷ нест</div>';
         }
 
-        async function saveStepDay() {
+        async function saveDay() {
             const date = document.getElementById('stepDate').value;
             const store = selectedStore;
             const admin = document.getElementById('stepAdmin').value || 'Админ';
@@ -1207,8 +1213,8 @@
             const cashless = parseFloat(document.getElementById('stepCashless').value) || 0;
             const returnCash = hasReturn ? (parseFloat(document.getElementById('stepReturnCash').value) || 0) : 0;
             const returnCashless = hasReturn ? (parseFloat(document.getElementById('stepReturnCashless').value) || 0) : 0;
-            const safeCash = parseInt(document.getElementById('stepSafeCash').textContent.replace(/[^\d]/g,'')) || 0;
-            const safeCashless = parseInt(document.getElementById('stepSafeCashless').textContent.replace(/[^\d]/g,'')) || 0;
+            const safeCash = parseInt(document.getElementById('safeCash').textContent.replace(/[^\d]/g,'')) || 0;
+            const safeCashless = parseInt(document.getElementById('safeCashless').textContent.replace(/[^\d]/g,'')) || 0;
             
             let expenseCash = 0, expenseCashless = 0;
             stepExpenses.forEach(e => { if (e.amount) { if (e.type==='cash') expenseCash+=e.amount; else expenseCashless+=e.amount; } });
@@ -1233,46 +1239,59 @@
                 resetStepData();
                 setTimeout(() => goToMainMenu(), 1500);
             } catch (error) {
-                showToast('❌ Хато ҳангоми сабт', 'error');
+                showToast('❌ Хато', 'error');
             }
+        }
+
+        function resetStepData() {
+            stepExpenses = []; stepReceiptImage = null; hasReturn = false;
+            document.getElementById('stepTotal').value = '';
+            document.getElementById('stepCashless').value = '';
+            document.getElementById('stepCash').value = '';
+            document.getElementById('stepReturnCash').value = '';
+            document.getElementById('stepReturnCashless').value = '';
+            document.getElementById('stepAdmin').value = '';
+            document.getElementById('returnFields').classList.remove('show');
+            document.getElementById('stepUploadContent').innerHTML = '<div class="upload-icon">📷</div><div class="upload-text">Акси чекро прикреп кунед</div>';
+            renderExpenses();
         }
 
         function formatMoney(amount) { return amount.toLocaleString('ru-RU') + ' ₽'; }
         function getCategoryName(id) { const c = categories.find(c => c.id === id); return c ? c.name : id; }
 
-        // PDF generation
+        // PDF
         function generatePDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             doc.setFontSize(22); doc.setTextColor(251,191,36); doc.text('ҲИСОБОТИ РӮЗОНА',105,20,{align:'center'});
             doc.setFontSize(14); doc.setTextColor(255,255,255);
-            const shop = document.getElementById('stepSummaryShop').textContent;
-            const date = document.getElementById('stepSummaryDate').textContent;
-            const admin = document.getElementById('stepSummaryAdmin').textContent;
+            const shop = document.getElementById('summaryShop').textContent;
+            const date = document.getElementById('summaryDate').textContent;
+            const admin = document.getElementById('summaryAdmin').textContent;
             doc.text(`Магазин: ${shop}`,20,40); doc.text(`Сана: ${date}`,20,50); doc.text(`Администратор: ${admin}`,20,60);
             doc.setDrawColor(251,191,36); doc.line(20,65,190,65);
 
             doc.setFillColor(37,99,235,0.2); doc.roundedRect(20,75,170,25,3,3,'F');
             doc.setTextColor(255,255,255); doc.setFontSize(12);
             doc.text('📦 БОҚИЯИ ДИРӮЗА ДАР СЕЙФ', 25, 85);
-            doc.text(`НАҚД: ${document.getElementById('stepSafeCash').textContent}`, 25, 95);
-            doc.text(`БЕЗНАЛ: ${document.getElementById('stepSafeCashless').textContent}`, 110, 95);
+            doc.text(`НАҚД: ${document.getElementById('safeCash').textContent}`, 25, 95);
+            doc.text(`БЕЗНАЛ: ${document.getElementById('safeCashless').textContent}`, 110, 95);
 
             let yPos = 110;
             doc.setTextColor(251,191,36); doc.text('Фурӯши имрӯза:',20,yPos); yPos+=10;
             doc.setTextColor(255,255,255);
-            doc.text(`Умумӣ: ${document.getElementById('stepSummaryTotal').textContent}`,30,yPos); yPos+=10;
-            doc.text(`Нақдӣ: ${document.getElementById('stepSummaryCash').textContent}`,30,yPos); yPos+=10;
-            doc.text(`Безнал: ${document.getElementById('stepSummaryCashless').textContent}`,30,yPos); yPos+=10;
+            doc.text(`Умумӣ: ${document.getElementById('summaryTotal').textContent}`,30,yPos); yPos+=10;
+            doc.text(`Нақдӣ: ${document.getElementById('summaryCash').textContent}`,30,yPos); yPos+=10;
+            doc.text(`Безнал: ${document.getElementById('summaryCashless').textContent}`,30,yPos); yPos+=10;
 
             doc.setTextColor(251,191,36); doc.text('Бозгашт:',20,yPos); yPos+=10;
             doc.setTextColor(255,255,255);
-            doc.text(`Нақдӣ: ${document.getElementById('stepSummaryReturnCash').textContent}`,30,yPos); yPos+=10;
-            doc.text(`Безнал: ${document.getElementById('stepSummaryReturnCashless').textContent}`,30,yPos); yPos+=10;
+            doc.text(`Нақдӣ: ${document.getElementById('summaryReturnCash').textContent}`,30,yPos); yPos+=10;
+            doc.text(`Безнал: ${document.getElementById('summaryReturnCashless').textContent}`,30,yPos); yPos+=10;
 
             doc.setTextColor(251,191,36); doc.text('Харҷҳо:',20,yPos); yPos+=10;
             doc.setTextColor(255,255,255);
-            const expensesList = document.getElementById('stepSummaryExpensesList').children;
+            const expensesList = document.getElementById('summaryExpensesList').children;
             if (!expensesList.length || expensesList[0]?.textContent === 'Харҷ нест') {
                 doc.text('Харҷ нест',30,yPos); yPos+=10;
             } else {
@@ -1284,18 +1303,18 @@
             yPos+=10;
             doc.setTextColor(251,191,36); doc.text('Боқия дар сейф (пас аз рӯз):',20,yPos); yPos+=10;
             doc.setTextColor(255,255,255);
-            doc.text(`НАҚД: ${document.getElementById('stepSummarySafeCash').textContent}`,30,yPos); yPos+=10;
-            doc.text(`БЕЗНАЛ: ${document.getElementById('stepSummarySafeCashless').textContent}`,30,yPos);
+            doc.text(`НАҚД: ${document.getElementById('summarySafeCash').textContent}`,30,yPos); yPos+=10;
+            doc.text(`БЕЗНАЛ: ${document.getElementById('summarySafeCashless').textContent}`,30,yPos);
             return doc;
         }
 
-        async function shareStepPDF() {
+        async function sharePDF() {
             try {
                 showToast('⏳ Тайёр кардани PDF...','info');
                 const doc = generatePDF();
                 const blob = doc.output('blob');
-                const shop = document.getElementById('stepSummaryShop').textContent;
-                const date = document.getElementById('stepSummaryDate').textContent.replace(/\./g,'-');
+                const shop = document.getElementById('summaryShop').textContent;
+                const date = document.getElementById('summaryDate').textContent.replace(/\./g,'-');
                 const file = new File([blob], `hisobot_${shop}_${date}.pdf`, { type: 'application/pdf' });
                 
                 if (navigator.share && navigator.canShare?.({ files: [file] })) {
@@ -1305,16 +1324,18 @@
                     showToast('❌ Фиристодан дастгирӣ намешавад', 'error');
                 }
             } catch(e) {
-                showToast('❌ Хато ҳангоми фиристодан','error');
+                showToast('❌ Хато', 'error');
             }
         }
 
+        // Шаги
         function nextStep(step) {
             if (step === 1) showScreen('dailyStep2');
             else if (step === 2) showScreen('dailyStep3');
-            else if (step === 3) { showScreen('dailyStep4'); renderStepCategories(); }
-            else if (step === 4) { calculateStepTotals(); showScreen('dailyStep5'); }
+            else if (step === 3) { showScreen('dailyStep4'); renderCategories(); }
+            else if (step === 4) { calculateTotals(); showScreen('dailyStep5'); }
         }
+
         function prevStep(step) {
             if (step === 1) showScreen('dailyStep1');
             else if (step === 2) showScreen('dailyStep2');
@@ -1322,12 +1343,17 @@
             else if (step === 4) showScreen('dailyStep4');
         }
 
+        // Месячный отчёт
         function changeMonth(delta) { currentDate.setMonth(currentDate.getMonth()+delta); updateMonthlyReport(); }
+        
         function updateMonthlyReport() {
             const months = ['Январ','Феврал','Март','Апрел','Май','Июн','Июл','Август','Сентябр','Октябр','Ноябр','Декабр'];
             document.getElementById('currentMonth').textContent = months[currentDate.getMonth()]+' '+currentDate.getFullYear();
-            const monthReports = reports.filter(r => new Date(r.date).getMonth()===currentDate.getMonth() && new Date(r.date).getFullYear()===currentDate.getFullYear())
-                .sort((a,b)=>new Date(a.date)-new Date(b.date));
+            
+            const monthReports = reports.filter(r => {
+                const d = new Date(r.date);
+                return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
+            }).sort((a,b) => new Date(a.date) - new Date(b.date));
             
             document.getElementById('monthTotalSales').textContent = formatMoney(monthReports.reduce((s,r)=>s+(r.totalSales||0),0));
             document.getElementById('monthTotalExpenses').textContent = formatMoney(monthReports.reduce((s,r)=>s+(r.totalExpenses||0),0));
@@ -1335,45 +1361,62 @@
             document.getElementById('monthCashless').textContent = formatMoney(monthReports.reduce((s,r)=>s+(r.cashless||0),0));
             
             const tb = document.getElementById('monthlyTable');
-            if (!monthReports.length) tb.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;">Ҳисобот нест</td></tr>';
-            else tb.innerHTML = monthReports.map(r => `<tr class="clickable" onclick="showToast('Просмотр в разработке')"><td>${formatDate(r.date)}</td><td>${r.store}</td><td>${formatMoney(r.totalSales)}</td><td>${formatMoney(r.totalExpenses)}</td></tr>`).join('');
+            if (!monthReports.length) {
+                tb.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;">Ҳисобот нест</td></tr>';
+            } else {
+                tb.innerHTML = monthReports.map(r => 
+                    `<tr class="clickable" onclick="showToast('Просмотр в разработке')">
+                        <td>${formatDate(r.date)}</td>
+                        <td>${r.store}</td>
+                        <td>${formatMoney(r.totalSales)}</td>
+                        <td>${formatMoney(r.totalExpenses)}</td>
+                    </tr>`
+                ).join('');
+            }
             
-            const cats = {};
+            // Категории
+            const catSums = {};
             monthReports.forEach(r => {
                 if (r.expenses) {
                     r.expenses.forEach(e => {
                         if (e.category) {
                             const catName = getCategoryName(e.category);
-                            cats[catName] = (cats[catName] || 0) + (e.amount || 0);
+                            catSums[catName] = (catSums[catName] || 0) + (e.amount || 0);
                         }
                     });
                 }
             });
             
+            // График
             const chart = document.getElementById('expenseChart');
-            if (Object.keys(cats).length === 0) {
+            if (Object.keys(catSums).length === 0) {
                 chart.innerHTML = '<div style="text-align:center;color:var(--text-secondary);">Харҷ нест</div>';
             } else {
-                const max = Math.max(...Object.values(cats), 1);
-                chart.innerHTML = Object.entries(cats).map(([k,v]) => 
+                const max = Math.max(...Object.values(catSums), 1);
+                chart.innerHTML = Object.entries(catSums).map(([k,v]) => 
                     `<div class="bar-item"><div class="bar" style="height:${v/max*100}px;"></div><div class="bar-label">${k.substring(0,3)}</div></div>`
                 ).join('');
             }
             
-            const total = Object.values(cats).reduce((a,b)=>a+b,0);
+            // Таблица категорий
+            const total = Object.values(catSums).reduce((a,b)=>a+b,0);
             const catBody = document.getElementById('categoryTable');
             if (total === 0) {
                 catBody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:16px;">Харҷ нест</td></tr>';
             } else {
-                catBody.innerHTML = Object.entries(cats)
+                catBody.innerHTML = Object.entries(catSums)
                     .sort((a,b)=>b[1]-a[1])
                     .map(([k,v]) => `<tr><td>${k}</td><td>${formatMoney(v)}</td><td>${((v/total)*100).toFixed(1)}%</td></tr>`)
                     .join('');
             }
         }
 
-        function formatDate(ds) { let d = new Date(ds); return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}`; }
+        function formatDate(ds) { 
+            const d = new Date(ds); 
+            return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}`; 
+        }
 
+        // История
         function updateHistory() {
             let filtered = [...reports];
             const fd = document.getElementById('filterDate').value;
@@ -1383,17 +1426,26 @@
             filtered.sort((a,b)=>new Date(b.date)-new Date(a.date));
             
             const cont = document.getElementById('historyList');
-            if (!filtered.length) { cont.innerHTML = '<div class="empty-state"><div class="icon">📋</div><h3>Ҳисобот нест</h3></div>'; return; }
+            if (!filtered.length) { 
+                cont.innerHTML = '<div class="empty-state"><div class="icon">📋</div><h3>Ҳисобот нест</h3></div>'; 
+                return; 
+            }
             
             cont.innerHTML = filtered.map(r => {
                 const d = new Date(r.date);
                 const ds = `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getFullYear()}`;
-                return `<div class="history-item"><div class="header-row"><div class="date">${ds}</div><div class="store-badge">${r.store}</div></div>
-                <div class="amounts"><div><span class="label">Фурӯш:</span> ${formatMoney(r.totalSales)}</div><div><span class="label">Харҷ:</span> ${formatMoney(r.totalExpenses)}</div></div>
-                ${r.receiptImage ? `<img class="thumbnail" src="${r.receiptImage}" onclick="showImageModal('${r.receiptImage}')">` : ''}
-                <div class="action-buttons"><button class="btn btn-danger" onclick="deleteReport('${r.id}')">Нест кардан</button></div></div>`;
+                return `<div class="history-item">
+                    <div class="header-row"><div class="date">${ds}</div><div class="store-badge">${r.store}</div></div>
+                    <div class="amounts">
+                        <div><span class="label">Фурӯш:</span> ${formatMoney(r.totalSales)}</div>
+                        <div><span class="label">Харҷ:</span> ${formatMoney(r.totalExpenses)}</div>
+                    </div>
+                    ${r.receiptImage ? `<img class="thumbnail" src="${r.receiptImage}" onclick="showImageModal('${r.receiptImage}')">` : ''}
+                    <div class="action-buttons"><button class="btn btn-danger" onclick="deleteReport('${r.id}')">Нест кардан</button></div>
+                </div>`;
             }).join('');
         }
+
         function filterHistory() { updateHistory(); }
 
         async function deleteReport(id) {
@@ -1402,18 +1454,30 @@
                 await db.collection('reports').doc(id).delete(); 
                 showToast('✅ Ҳисобот нест шуд'); 
             } catch(e) { 
-                showToast('❌ Хато ҳангоми нест кардан', 'error'); 
+                showToast('❌ Хато', 'error'); 
             }
         }
 
-        function showImageModal(src) { document.getElementById('modalImage').src = src; document.getElementById('imageModal').classList.add('active'); }
-        function closeModal() { document.getElementById('imageModal').classList.remove('active'); }
-        function showToast(msg, type='success') {
-            let t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); t.classList.toggle('error', type==='error');
-            setTimeout(()=>t.classList.remove('show'), 3000);
+        // Modal
+        function showImageModal(src) { 
+            document.getElementById('modalImage').src = src; 
+            document.getElementById('imageModal').classList.add('active'); 
+        }
+        
+        function closeModal() { 
+            document.getElementById('imageModal').classList.remove('active'); 
         }
 
-        // INIT
+        // Toast
+        function showToast(msg, type='success') {
+            const t = document.getElementById('toast'); 
+            t.textContent = msg; 
+            t.classList.add('show'); 
+            t.classList.toggle('error', type==='error');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // Init
         document.addEventListener('DOMContentLoaded', async () => {
             await loadCategories();
             document.getElementById('stepDate').value = new Date().toISOString().split('T')[0];
