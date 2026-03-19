@@ -483,6 +483,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            cursor: pointer;
         }
         .category-tag.selected { background: var(--purple); color: white; }
         .category-tag .remove-cat {
@@ -901,9 +902,6 @@
         <div class="nav-item" onclick="showScreen('historyScreen')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span>Таърих</span></div>
     </nav>
 
-    <!-- Кнопка синхронизации больше не нужна -->
-    <button class="sync-btn" id="syncBtn" style="display:none;">🔄</button>
-
     <!-- Modal -->
     <div class="modal-overlay" id="imageModal" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()"><button class="modal-close" onclick="closeModal()">×</button><img class="modal-image" id="modalImage" src="" alt="Receipt"></div></div>
 
@@ -911,7 +909,7 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // 🔥 FIREBASE КОНФИГУРАЦИЯ - НЕ МЕНЯТЬ!
+        // 🔥 FIREBASE КОНФИГУРАЦИЯ
         firebase.initializeApp({
             apiKey: "AIzaSyDqDs4QxH0jhtFvFqtR20b5lbRKGAyQV6U",
             authDomain: "hisobot-app-914ce.firebaseapp.com",
@@ -930,23 +928,47 @@
         let stepExpenses = [];
         let stepReceiptImage = null;
         let reports = [];
-        let categories = [
-            { id: 'products', name: 'Маҳсулот' },
-            { id: 'salary', name: 'Музд' },
-            { id: 'rent', name: 'Иҷора' },
-            { id: 'utilities', name: 'Коммунал' },
-            { id: 'other', name: 'Дигар' }
-        ];
+        let categories = [];
         let selectedCategory = null;
         let hasReturn = false;
 
         // ============================================
-        // ПОДПИСКА НА ИЗМЕНЕНИЯ
+        // ЗАГРУЗКА КАТЕГОРИЙ ИЗ FIREBASE
+        // ============================================
+        async function loadCategories() {
+            const snapshot = await db.collection('categories').get();
+            if (!snapshot.empty) {
+                categories = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
+            } else {
+                // Если категорий нет, создаём базовые
+                const baseCategories = [
+                    { id: 'products', name: 'Маҳсулот' },
+                    { id: 'salary', name: 'Музд' },
+                    { id: 'rent', name: 'Иҷора' },
+                    { id: 'utilities', name: 'Коммунал' },
+                    { id: 'other', name: 'Дигар' }
+                ];
+                for (let cat of baseCategories) {
+                    await db.collection('categories').doc(cat.id).set({ name: cat.name });
+                }
+                categories = baseCategories;
+            }
+            renderStepCategories();
+        }
+
+        // ============================================
+        // ПОДПИСКА НА ИЗМЕНЕНИЯ В FIREBASE
         // ============================================
         db.collection('reports').onSnapshot(snapshot => {
             reports = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             if (document.getElementById('monthlyReportScreen').classList.contains('active')) updateMonthlyReport();
             if (document.getElementById('historyScreen').classList.contains('active')) updateHistory();
+        });
+
+        // Подписка на изменения категорий
+        db.collection('categories').onSnapshot(snapshot => {
+            categories = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
+            renderStepCategories();
         });
 
         // ============================================
@@ -1013,7 +1035,7 @@
         }
 
         // ============================================
-        // ФУНКЦИИ ШАГОВ (сокращено для экономии места)
+        // ФУНКЦИИ ШАГОВ
         // ============================================
         function resetStepData() {
             stepExpenses = []; stepReceiptImage = null; hasReturn = false;
@@ -1025,8 +1047,7 @@
             document.getElementById('stepAdmin').value = '';
             document.getElementById('returnFields').classList.remove('show');
             document.getElementById('stepUploadContent').innerHTML = '<div class="upload-icon">📷</div><div class="upload-text">Акси чекро прикреп кунед</div>';
-            document.getElementById('stepExpensesList').innerHTML = '';
-            renderStepCategories();
+            renderStepExpenses();
         }
 
         function updateStepDate() {
@@ -1074,24 +1095,39 @@
             f.style.display = f.style.display === 'none' ? 'flex' : 'none';
         }
 
-        function addStepCategory() {
+        async function addStepCategory() {
             const inp = document.getElementById('stepNewCategoryName');
             const name = inp.value.trim();
             if (!name) { showToast('Номи категорияро ворид кунед'); return; }
-            categories.push({ id: 'cat_' + Date.now(), name });
-            renderStepCategories();
-            inp.value = '';
-            toggleStepCategoryForm();
-            showToast('Категория илова шуд');
+            
+            try {
+                const newId = 'cat_' + Date.now();
+                await db.collection('categories').doc(newId).set({ name });
+                showToast('Категория илова шуд');
+                inp.value = '';
+                toggleStepCategoryForm();
+            } catch (error) {
+                showToast('❌ Хато ҳангоми илова', 'error');
+            }
         }
 
-        function removeStepCategory(id) {
-            if (stepExpenses.some(e => e.category === id)) { showToast('Ин категория дар харҷҳо истифода шудааст'); return; }
-            if (['products','salary','rent','utilities','other'].includes(id)) { showToast('Категорияи асосиро нест карда наметавонед'); return; }
-            categories = categories.filter(c => c.id !== id);
-            if (selectedCategory === id) selectedCategory = null;
-            renderStepCategories();
-            showToast('Категория нест шуд');
+        async function removeStepCategory(id) {
+            if (stepExpenses.some(e => e.category === id)) { 
+                showToast('Ин категория дар харҷҳо истифода шудааст'); 
+                return; 
+            }
+            if (['products','salary','rent','utilities','other'].includes(id)) { 
+                showToast('Категорияи асосиро нест карда наметавонед'); 
+                return; 
+            }
+            
+            try {
+                await db.collection('categories').doc(id).delete();
+                if (selectedCategory === id) selectedCategory = null;
+                showToast('Категория нест шуд');
+            } catch (error) {
+                showToast('❌ Хато ҳангоми нест кардан', 'error');
+            }
         }
 
         function selectStepCategory(id) {
@@ -1303,16 +1339,37 @@
             else tb.innerHTML = monthReports.map(r => `<tr class="clickable" onclick="showToast('Просмотр в разработке')"><td>${formatDate(r.date)}</td><td>${r.store}</td><td>${formatMoney(r.totalSales)}</td><td>${formatMoney(r.totalExpenses)}</td></tr>`).join('');
             
             const cats = {};
-            monthReports.forEach(r => r.expenses?.forEach(e => { if (e.category) cats[e.category] = (cats[e.category]||0)+(e.amount||0); }));
-            const max = Math.max(...Object.values(cats),1);
-            document.getElementById('expenseChart').innerHTML = Object.entries(cats).length ? 
-                Object.entries(cats).map(([k,v]) => `<div class="bar-item"><div class="bar" style="height:${v/max*100}px;"></div><div class="bar-label">${k.substring(0,3)}</div></div>`).join('') :
-                '<div style="text-align:center;color:var(--text-secondary);">Харҷ нест</div>';
+            monthReports.forEach(r => {
+                if (r.expenses) {
+                    r.expenses.forEach(e => {
+                        if (e.category) {
+                            const catName = getCategoryName(e.category);
+                            cats[catName] = (cats[catName] || 0) + (e.amount || 0);
+                        }
+                    });
+                }
+            });
+            
+            const chart = document.getElementById('expenseChart');
+            if (Object.keys(cats).length === 0) {
+                chart.innerHTML = '<div style="text-align:center;color:var(--text-secondary);">Харҷ нест</div>';
+            } else {
+                const max = Math.max(...Object.values(cats), 1);
+                chart.innerHTML = Object.entries(cats).map(([k,v]) => 
+                    `<div class="bar-item"><div class="bar" style="height:${v/max*100}px;"></div><div class="bar-label">${k.substring(0,3)}</div></div>`
+                ).join('');
+            }
             
             const total = Object.values(cats).reduce((a,b)=>a+b,0);
-            document.getElementById('categoryTable').innerHTML = Object.entries(cats).length ?
-                Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v]) => `<tr><td>${k}</td><td>${formatMoney(v)}</td><td>${((v/total)*100).toFixed(1)}%</td></tr>`).join('') :
-                '<tr><td colspan="3" style="text-align:center;padding:16px;">Харҷ нест</td></tr>';
+            const catBody = document.getElementById('categoryTable');
+            if (total === 0) {
+                catBody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:16px;">Харҷ нест</td></tr>';
+            } else {
+                catBody.innerHTML = Object.entries(cats)
+                    .sort((a,b)=>b[1]-a[1])
+                    .map(([k,v]) => `<tr><td>${k}</td><td>${formatMoney(v)}</td><td>${((v/total)*100).toFixed(1)}%</td></tr>`)
+                    .join('');
+            }
         }
 
         function formatDate(ds) { let d = new Date(ds); return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}`; }
@@ -1341,8 +1398,12 @@
 
         async function deleteReport(id) {
             if (!confirm('Шумо мутмаин ҳастед?')) return;
-            try { await db.collection('reports').doc(id).delete(); showToast('✅ Ҳисобот нест шуд'); } 
-            catch(e) { showToast('❌ Хато ҳангоми нест кардан', 'error'); }
+            try { 
+                await db.collection('reports').doc(id).delete(); 
+                showToast('✅ Ҳисобот нест шуд'); 
+            } catch(e) { 
+                showToast('❌ Хато ҳангоми нест кардан', 'error'); 
+            }
         }
 
         function showImageModal(src) { document.getElementById('modalImage').src = src; document.getElementById('imageModal').classList.add('active'); }
@@ -1352,7 +1413,9 @@
             setTimeout(()=>t.classList.remove('show'), 3000);
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        // INIT
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadCategories();
             document.getElementById('stepDate').value = new Date().toISOString().split('T')[0];
             showScreen('storeScreen');
             document.getElementById('navBar').style.display = 'none';
