@@ -1,5 +1,31 @@
 {
-  "reports": [],
+  "reports": [
+    {
+      "id": 1773903296239,
+      "date": "2026-03-19",
+      "store": "F-1",
+      "adminName": "али ",
+      "totalCheck": 132320,
+      "cashless": 24242,
+      "cash": 108078,
+      "returnCash": 0,
+      "returnCashless": 0,
+      "expenses": [
+        {
+          "id": 1773903252375,
+          "type": "cash",
+          "category": "cat_1773903250556",
+          "amount": 5000
+        }
+      ],
+      "receiptImage": null,
+      "totalSales": 132320,
+      "totalReturns": 0,
+      "totalExpenses": 5000,
+      "safeCash": 111462,
+      "safeCashless": 459167
+    }
+  ],
   "categories": [
     {
       "id": "products",
@@ -20,7 +46,11 @@
     {
       "id": "other",
       "name": "Дигар"
+    },
+    {
+      "id": "cat_1773903250556",
+      "name": "аванс"
     }
   ],
-  "lastUpdate": "2026-03-19T06:53:23.106Z"
+  "lastUpdate": "2026-03-19T06:54:56.885Z"
 }
