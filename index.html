@@ -463,7 +463,12 @@
         .photo-upload .upload-text { color: var(--text-secondary); font-size: 14px; }
 
         .categories-section { margin-bottom: 20px; }
-        .categories-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .categories-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 12px; 
+        }
         .categories-list {
             display: flex;
             flex-wrap: wrap;
@@ -793,8 +798,8 @@
                 <div class="yesno-buttons"><button class="yes-btn" onclick="showReturnFields(true)">ҲА</button><button class="no-btn" onclick="showReturnFields(false)">НЕ</button></div>
                 <div id="returnFields" class="return-fields">
                     <div class="return-grid">
-                        <div class="amount-card"><div class="card-label">Нақдӣ</div><input type="number" class="card-input" id="stepReturnCash" placeholder="0" oninput="calculateStepTotals()"></div>
-                        <div class="amount-card"><div class="card-label">Безнал</div><input type="number" class="card-input" id="stepReturnCashless" placeholder="0" oninput="calculateStepTotals()"></div>
+                        <div class="amount-card"><div class="card-label">Нақдӣ</div><input type="number" class="card-input" id="stepReturnCash" placeholder="0" oninput="calculateTotals()"></div>
+                        <div class="amount-card"><div class="card-label">Безнал</div><input type="number" class="card-input" id="stepReturnCashless" placeholder="0" oninput="calculateTotals()"></div>
                     </div>
                 </div>
             </div>
@@ -807,8 +812,14 @@
             <div class="step-content">
                 <div class="step-title">📉 Харҷҳо</div>
                 <div class="categories-section">
-                    <div class="categories-header"><div class="input-label">Категорияҳо</div><button class="btn-purple" style="padding:8px 14px;font-size:13px;width:auto;" onclick="toggleCategoryForm()">+ Категория</button></div>
-                    <div id="categoryForm" style="display:none;" class="add-category-form"><input type="text" id="newCategoryName" placeholder="Номи категория"><button onclick="addCategory()">Илова</button></div>
+                    <div class="categories-header">
+                        <div class="input-label">Категорияҳо</div>
+                        <button class="btn-purple" style="padding:8px 14px;font-size:13px;width:auto;" onclick="toggleCategoryForm()">+ Категория</button>
+                    </div>
+                    <div id="categoryForm" style="display:none;" class="add-category-form">
+                        <input type="text" id="newCategoryName" placeholder="Номи категория">
+                        <button onclick="addCategory()">Илова</button>
+                    </div>
                     <div class="categories-list" id="categoriesList"></div>
                 </div>
                 <div id="expensesList"></div>
@@ -871,25 +882,79 @@
         <!-- Monthly Report Screen -->
         <div id="monthlyReportScreen" class="screen">
             <div class="header"><h1>Ҳисоботи моҳона</h1></div>
-            <div class="month-nav"><button onclick="changeMonth(-1)">←</button><div class="current-month" id="currentMonth">Январ 2024</div><button onclick="changeMonth(1)">→</button></div>
+            
+            <!-- Фильтр по магазину -->
+            <div style="margin-bottom: 20px;">
+                <select id="monthlyStoreFilter" class="input-field" onchange="updateMonthlyReport()">
+                    <option value="">Ҳама магазинҳо</option>
+                    <option value="F-1">F-1</option>
+                    <option value="F-5">F-5</option>
+                    <option value="F-7">F-7</option>
+                </select>
+            </div>
+
+            <div class="month-nav">
+                <button onclick="changeMonth(-1)">←</button>
+                <div class="current-month" id="currentMonth">Январ 2024</div>
+                <button onclick="changeMonth(1)">→</button>
+            </div>
+
             <div class="stats-grid">
                 <div class="stat-card"><div class="stat-label">Ҷами фурӯш</div><div class="stat-value" id="monthTotalSales">0 ₽</div></div>
                 <div class="stat-card"><div class="stat-label">Харҷҳо</div><div class="stat-value" id="monthTotalExpenses">0 ₽</div></div>
                 <div class="stat-card"><div class="stat-label">Нақдӣ</div><div class="stat-value" id="monthCash">0 ₽</div></div>
                 <div class="stat-card"><div class="stat-label">Безнал</div><div class="stat-value" id="monthCashless">0 ₽</div></div>
             </div>
-            <div class="chart-container"><div class="chart-title">Харҷҳо ба категорияҳо</div><div class="bar-chart" id="expenseChart"></div></div>
+
+            <div class="chart-container">
+                <div class="chart-title">Харҷҳо ба категорияҳо</div>
+                <div class="bar-chart" id="expenseChart"></div>
+            </div>
+
             <div class="section-title">Ҳисобот рӯзона</div>
-            <div class="table-container"><table><thead><tr><th>Сана</th><th>Магазин</th><th>Фурӯш</th><th>Харҷ</th></tr></thead><tbody id="monthlyTable"></tbody></table></div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Сана</th>
+                            <th>Магазин</th>
+                            <th>Фурӯш</th>
+                            <th>Харҷ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monthlyTable"></tbody>
+                </table>
+            </div>
+
             <div class="section-title">Категорияҳои харҷ</div>
-            <div class="table-container"><table><thead><tr><th>Категория</th><th>Сумма</th><th>%</th></tr></thead><tbody id="categoryTable"></tbody></table></div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Категория</th>
+                            <th>Сумма</th>
+                            <th>%</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoryTable"></tbody>
+                </table>
+            </div>
+
             <button class="btn btn-home" onclick="goToMainMenu()" style="margin-bottom:16px;">🏠 БА МЕНЮИ АСОСӢ</button>
         </div>
 
         <!-- History Screen -->
         <div id="historyScreen" class="screen">
             <div class="header"><h1>Таърих</h1></div>
-            <div class="history-filters"><input type="date" id="filterDate" onchange="filterHistory()"><select id="filterStore" onchange="filterHistory()"><option value="">Ҳама</option><option value="F-1">F-1</option><option value="F-5">F-5</option><option value="F-7">F-7</option></select></div>
+            <div class="history-filters">
+                <input type="date" id="filterDate" onchange="filterHistory()">
+                <select id="filterStore" onchange="filterHistory()">
+                    <option value="">Ҳама</option>
+                    <option value="F-1">F-1</option>
+                    <option value="F-5">F-5</option>
+                    <option value="F-7">F-7</option>
+                </select>
+            </div>
             <div id="historyList"></div>
             <button class="btn btn-home" onclick="goToMainMenu()" style="margin-bottom:16px;">🏠 БА МЕНЮИ АСОСӢ</button>
         </div>
@@ -897,28 +962,53 @@
 
     <!-- Navigation Bar -->
     <nav class="nav-bar" id="navBar" style="display:none;">
-        <div class="nav-item active" onclick="showScreen('dailyStep1')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg><span>Рӯзона</span></div>
-        <div class="nav-item" onclick="showScreen('monthlyReportScreen')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg><span>Моҳона</span></div>
-        <div class="nav-item" onclick="showScreen('historyScreen')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span>Таърих</span></div>
+        <div class="nav-item active" onclick="showScreen('dailyStep1')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>Рӯзона</span>
+        </div>
+        <div class="nav-item" onclick="showScreen('monthlyReportScreen')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="20" x2="18" y2="10"></line>
+                <line x1="12" y1="20" x2="12" y2="4"></line>
+                <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            <span>Моҳона</span>
+        </div>
+        <div class="nav-item" onclick="showScreen('historyScreen')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>Таърих</span>
+        </div>
     </nav>
 
     <!-- Modal -->
-    <div class="modal-overlay" id="imageModal" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()"><button class="modal-close" onclick="closeModal()">×</button><img class="modal-image" id="modalImage" src="" alt="Receipt"></div></div>
+    <div class="modal-overlay" id="imageModal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <img class="modal-image" id="modalImage" src="" alt="Receipt">
+        </div>
+    </div>
 
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
     <script>
-        // 🔥 ВСТАВЬ СВОИ НОВЫЕ КЛЮЧИ СЮДА!
+        // 🔥 FIREBASE КОНФИГУРАЦИЯ - ВСТАВЬ СВОИ КЛЮЧИ!
         const firebaseConfig = {
-  apiKey: "AIzaSyAicdvSy3IoaqkLUJhZNCBjEFGOO5Nyu0o",
-  authDomain: "hisobot-new.firebaseapp.com",
-  projectId: "hisobot-new",
-  storageBucket: "hisobot-new.firebasestorage.app",
-  messagingSenderId: "341893612700",
-  appId: "1:341893612700:web:6e9f4873cbb30f60491959"
-};
-
+            apiKey: "AIzaSyDqDs4QxH0jhtFvFqtR20b5lbRKGAyQV6U",
+            authDomain: "hisobot-app-914ce.firebaseapp.com",
+            projectId: "hisobot-app-914ce",
+            storageBucket: "hisobot-app-914ce.firebasestorage.app",
+            messagingSenderId: "306527113905",
+            appId: "1:306527113905:web:58c93a7a850a8403d04890"
+        };
 
         // Инициализация Firebase
         firebase.initializeApp(firebaseConfig);
@@ -937,25 +1027,34 @@
         let hasReturn = false;
 
         // ============================================
-        // ЗАГРУЗКА КАТЕГОРИЙ
+        // ЗАГРУЗКА КАТЕГОРИЙ ДЛЯ ТЕКУЩЕГО МАГАЗИНА
         // ============================================
         async function loadCategories() {
-            const snapshot = await db.collection('categories').get();
+            if (!selectedStore) return;
+            
+            const snapshot = await db.collection('categories')
+                .where('store', '==', selectedStore)
+                .get();
+                
             if (snapshot.empty) {
-                // Создаём базовые категории
+                // Создаём базовые категории для этого магазина
                 const baseCats = [
-                    { id: 'products', name: 'Маҳсулот' },
-                    { id: 'salary', name: 'Музд' },
-                    { id: 'rent', name: 'Иҷора' },
-                    { id: 'utilities', name: 'Коммунал' },
-                    { id: 'other', name: 'Дигар' }
+                    { store: selectedStore, name: 'Маҳсулот' },
+                    { store: selectedStore, name: 'Музд' },
+                    { store: selectedStore, name: 'Иҷора' },
+                    { store: selectedStore, name: 'Коммунал' },
+                    { store: selectedStore, name: 'Дигар' }
                 ];
                 for (let cat of baseCats) {
-                    await db.collection('categories').doc(cat.id).set({ name: cat.name });
+                    await db.collection('categories').add(cat);
                 }
-                categories = baseCats;
+                // Загружаем снова
+                const newSnapshot = await db.collection('categories')
+                    .where('store', '==', selectedStore)
+                    .get();
+                categories = newSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             } else {
-                categories = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name }));
+                categories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             }
             renderCategories();
         }
@@ -987,8 +1086,12 @@
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
-            if (screenId === 'monthlyReportScreen') updateMonthlyReport();
-            else if (screenId === 'historyScreen') updateHistory();
+            if (screenId === 'monthlyReportScreen') {
+                updateMonthlyReport();
+            }
+            if (screenId === 'historyScreen') {
+                updateHistory();
+            }
         }
 
         function selectStore(store) {
@@ -998,7 +1101,7 @@
             document.getElementById('continueBtn').classList.add('visible');
         }
 
-        function goToDailyReport() {
+        async function goToDailyReport() {
             if (!selectedStore) return;
             resetStepData();
             document.getElementById('stepStore').textContent = selectedStore;
@@ -1007,7 +1110,10 @@
             document.getElementById('stepDate').value = today;
             updateStepDate();
             
-            // Загружаем остатки
+            // Загружаем категории для этого магазина
+            await loadCategories();
+            
+            // Загружаем остатки прошлого дня
             const prevDate = new Date(today);
             prevDate.setDate(prevDate.getDate() - 1);
             const prevId = `${selectedStore}_${prevDate.toISOString().split('T')[0]}`;
@@ -1018,6 +1124,7 @@
                     document.getElementById('safeCash').textContent = formatMoney(data.safeCash || 0);
                     document.getElementById('safeCashless').textContent = formatMoney(data.safeCashless || 0);
                 } else {
+                    // Начальные данные для каждого магазина
                     if (selectedStore === 'F-1') {
                         document.getElementById('safeCash').textContent = formatMoney(8384);
                         document.getElementById('safeCashless').textContent = formatMoney(434925);
@@ -1040,7 +1147,9 @@
         // ============================================
         function updateStepDate() {
             const d = document.getElementById('stepDate').value.split('-');
-            if (d.length === 3) document.getElementById('summaryDate').textContent = `${d[2]}.${d[1]}.${d[0]}`;
+            if (d.length === 3) {
+                document.getElementById('summaryDate').textContent = `${d[2]}.${d[1]}.${d[0]}`;
+            }
         }
 
         // ============================================
@@ -1052,7 +1161,10 @@
             document.getElementById('stepCash').value = Math.max(0, total - cashless);
         }
 
-        function selectStepPhoto() { document.getElementById('stepReceiptPhoto').click(); }
+        function selectStepPhoto() { 
+            document.getElementById('stepReceiptPhoto').click(); 
+        }
+        
         function onStepPhotoSelected(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -1083,7 +1195,10 @@
             const container = document.getElementById('categoriesList');
             if (!container) return;
             container.innerHTML = categories.map(cat => 
-                `<div class="category-tag ${selectedCategory === cat.id ? 'selected' : ''}" onclick="selectCategory('${cat.id}')">${cat.name}<span class="remove-cat" onclick="event.stopPropagation(); removeCategory('${cat.id}')">×</span></div>`
+                `<div class="category-tag ${selectedCategory === cat.id ? 'selected' : ''}" onclick="selectCategory('${cat.id}')">
+                    ${cat.name}
+                    <span class="remove-cat" onclick="event.stopPropagation(); removeCategory('${cat.id}')">×</span>
+                </div>`
             ).join('');
         }
 
@@ -1095,14 +1210,24 @@
         async function addCategory() {
             const inp = document.getElementById('newCategoryName');
             const name = inp.value.trim();
-            if (!name) { showToast('Номи категорияро ворид кунед'); return; }
+            if (!name) { 
+                showToast('Номи категорияро ворид кунед'); 
+                return; 
+            }
+            if (!selectedStore) { 
+                showToast('Магазин интихоб нашудааст'); 
+                return; 
+            }
             
             try {
-                const newId = 'cat_' + Date.now();
-                await db.collection('categories').doc(newId).set({ name });
-                showToast('Категория илова шуд');
+                await db.collection('categories').add({
+                    store: selectedStore,
+                    name: name
+                });
+                showToast('✅ Категория илова шуд');
                 inp.value = '';
                 toggleCategoryForm();
+                // Категории обновятся через snapshot
             } catch (error) {
                 showToast('❌ Хато', 'error');
             }
@@ -1113,15 +1238,11 @@
                 showToast('Ин категория дар харҷҳо истифода шудааст'); 
                 return; 
             }
-            if (['products','salary','rent','utilities','other'].includes(id)) { 
-                showToast('Категорияи асосиро нест карда наметавонед'); 
-                return; 
-            }
             
             try {
                 await db.collection('categories').doc(id).delete();
                 if (selectedCategory === id) selectedCategory = null;
-                showToast('Категория нест шуд');
+                showToast('✅ Категория нест шуд');
             } catch (error) {
                 showToast('❌ Хато', 'error');
             }
@@ -1132,11 +1253,23 @@
             renderCategories();
         }
 
+        // Подписка на изменения категорий
+        db.collection('categories').onSnapshot(() => {
+            if (selectedStore) {
+                loadCategories();
+            }
+        });
+
         // ============================================
         // РАСХОДЫ
         // ============================================
         function addExpense() {
-            stepExpenses.push({ id: Date.now(), type: 'cash', category: selectedCategory || 'other', amount: 0 });
+            stepExpenses.push({ 
+                id: Date.now(), 
+                type: 'cash', 
+                category: selectedCategory || (categories.length > 0 ? categories[0].id : 'other'), 
+                amount: 0 
+            });
             renderExpenses();
         }
 
@@ -1147,18 +1280,29 @@
 
         function updateExpense(id, field, value) {
             const exp = stepExpenses.find(e => e.id === id);
-            if (exp) exp[field] = field === 'amount' ? (parseFloat(value) || 0) : value;
+            if (exp) {
+                exp[field] = field === 'amount' ? (parseFloat(value) || 0) : value;
+            }
         }
 
         function renderExpenses() {
             const container = document.getElementById('expensesList');
-            if (!stepExpenses.length) { container.innerHTML = ''; return; }
+            if (!stepExpenses.length) { 
+                container.innerHTML = ''; 
+                return; 
+            }
             container.innerHTML = stepExpenses.map(exp => {
-                const opts = categories.map(c => `<option value="${c.id}" ${exp.category===c.id?'selected':''}>${c.name}</option>`).join('');
+                const opts = categories.map(c => 
+                    `<option value="${c.id}" ${exp.category === c.id ? 'selected' : ''}>${c.name}</option>`
+                ).join('');
+                
                 return `<div class="expense-item">
-                    <select onchange="updateExpense(${exp.id}, 'type', this.value)"><option value="cash" ${exp.type==='cash'?'selected':''}>НАҚД</option><option value="cashless" ${exp.type==='cashless'?'selected':''}>БЕЗНАЛ</option></select>
+                    <select onchange="updateExpense(${exp.id}, 'type', this.value)">
+                        <option value="cash" ${exp.type === 'cash' ? 'selected' : ''}>НАҚД</option>
+                        <option value="cashless" ${exp.type === 'cashless' ? 'selected' : ''}>БЕЗНАЛ</option>
+                    </select>
                     <select onchange="updateExpense(${exp.id}, 'category', this.value)">${opts}</select>
-                    <input type="number" placeholder="0" value="${exp.amount||''}" onchange="updateExpense(${exp.id}, 'amount', this.value)">
+                    <input type="number" placeholder="0" value="${exp.amount || ''}" onchange="updateExpense(${exp.id}, 'amount', this.value)">
                     <button onclick="removeExpense(${exp.id})">🗑</button>
                 </div>`;
             }).join('');
@@ -1177,7 +1321,12 @@
             const safeCashless = parseInt(document.getElementById('safeCashless').textContent.replace(/[^\d]/g,'')) || 0;
             
             let expenseCash = 0, expenseCashless = 0;
-            stepExpenses.forEach(e => { if (e.amount) { if (e.type==='cash') expenseCash+=e.amount; else expenseCashless+=e.amount; } });
+            stepExpenses.forEach(e => { 
+                if (e.amount) { 
+                    if (e.type === 'cash') expenseCash += e.amount; 
+                    else expenseCashless += e.amount; 
+                } 
+            });
             
             const finalCash = Math.max(0, safeCash + cash - expenseCash - returnCash);
             const finalCashless = Math.max(0, safeCashless + cashless - expenseCashless - returnCashless);
@@ -1194,7 +1343,10 @@
             stepExpenses.forEach(e => {
                 if (e.amount) {
                     const cat = categories.find(c => c.id === e.category);
-                    html += `<div class="expense-summary-item"><span>${cat ? cat.name : e.category} (${e.type==='cash'?'НАҚД':'БЕЗНАЛ'})</span><span class="expense-summary-amount">${formatMoney(e.amount)}</span></div>`;
+                    html += `<div class="expense-summary-item">
+                        <span>${cat ? cat.name : e.category} (${e.type === 'cash' ? 'НАҚД' : 'БЕЗНАЛ'})</span>
+                        <span class="expense-summary-amount">${formatMoney(e.amount)}</span>
+                    </div>`;
                 }
             });
             document.getElementById('summaryExpensesList').innerHTML = html || '<div class="expense-summary-item">Харҷ нест</div>';
@@ -1205,8 +1357,14 @@
             const store = selectedStore;
             const admin = document.getElementById('stepAdmin').value || 'Админ';
             
-            if (!date || !store) { showToast('Лутфан сана ва магазинро интихоб кунед'); return; }
-            if ((parseFloat(document.getElementById('stepTotal').value) || 0) === 0) { showToast('Лутфан суммаро ворид кунед'); return; }
+            if (!date || !store) { 
+                showToast('Лутфан сана ва магазинро интихоб кунед'); 
+                return; 
+            }
+            if ((parseFloat(document.getElementById('stepTotal').value) || 0) === 0) { 
+                showToast('Лутфан суммаро ворид кунед'); 
+                return; 
+            }
             
             const total = parseFloat(document.getElementById('stepTotal').value) || 0;
             const cash = parseFloat(document.getElementById('stepCash').value) || 0;
@@ -1217,19 +1375,32 @@
             const safeCashless = parseInt(document.getElementById('safeCashless').textContent.replace(/[^\d]/g,'')) || 0;
             
             let expenseCash = 0, expenseCashless = 0;
-            stepExpenses.forEach(e => { if (e.amount) { if (e.type==='cash') expenseCash+=e.amount; else expenseCashless+=e.amount; } });
+            stepExpenses.forEach(e => { 
+                if (e.amount) { 
+                    if (e.type === 'cash') expenseCash += e.amount; 
+                    else expenseCashless += e.amount; 
+                } 
+            });
             
             const finalCash = Math.max(0, safeCash + cash - expenseCash - returnCash);
             const finalCashless = Math.max(0, safeCashless + cashless - expenseCashless - returnCashless);
             
             const report = {
-                store, date, adminName: admin,
-                totalCheck: total, cashless, cash, returnCash, returnCashless,
+                store, 
+                date, 
+                adminName: admin,
+                totalCheck: total, 
+                cashless, 
+                cash, 
+                returnCash, 
+                returnCashless,
                 expenses: stepExpenses.filter(e => e.amount > 0),
                 receiptImage: stepReceiptImage,
-                totalSales: total, totalReturns: returnCash+returnCashless,
-                totalExpenses: expenseCash+expenseCashless,
-                safeCash: finalCash, safeCashless: finalCashless,
+                totalSales: total, 
+                totalReturns: returnCash + returnCashless,
+                totalExpenses: expenseCash + expenseCashless,
+                safeCash: finalCash, 
+                safeCashless: finalCashless,
                 createdAt: new Date().toISOString()
             };
             
@@ -1244,7 +1415,9 @@
         }
 
         function resetStepData() {
-            stepExpenses = []; stepReceiptImage = null; hasReturn = false;
+            stepExpenses = []; 
+            stepReceiptImage = null; 
+            hasReturn = false;
             document.getElementById('stepTotal').value = '';
             document.getElementById('stepCashless').value = '';
             document.getElementById('stepCash').value = '';
@@ -1256,54 +1429,79 @@
             renderExpenses();
         }
 
-        function formatMoney(amount) { return amount.toLocaleString('ru-RU') + ' ₽'; }
-        function getCategoryName(id) { const c = categories.find(c => c.id === id); return c ? c.name : id; }
+        function formatMoney(amount) { 
+            return amount.toLocaleString('ru-RU') + ' ₽'; 
+        }
+        
+        function getCategoryName(id) { 
+            const c = categories.find(c => c.id === id); 
+            return c ? c.name : id; 
+        }
 
+        // ============================================
         // PDF
+        // ============================================
         function generatePDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            doc.setFontSize(22); doc.setTextColor(251,191,36); doc.text('ҲИСОБОТИ РӮЗОНА',105,20,{align:'center'});
-            doc.setFontSize(14); doc.setTextColor(255,255,255);
+            doc.setFontSize(22); 
+            doc.setTextColor(251,191,36); 
+            doc.text('ҲИСОБОТИ РӮЗОНА',105,20,{align:'center'});
+            
+            doc.setFontSize(14); 
+            doc.setTextColor(255,255,255);
             const shop = document.getElementById('summaryShop').textContent;
             const date = document.getElementById('summaryDate').textContent;
             const admin = document.getElementById('summaryAdmin').textContent;
-            doc.text(`Магазин: ${shop}`,20,40); doc.text(`Сана: ${date}`,20,50); doc.text(`Администратор: ${admin}`,20,60);
-            doc.setDrawColor(251,191,36); doc.line(20,65,190,65);
+            doc.text(`Магазин: ${shop}`,20,40); 
+            doc.text(`Сана: ${date}`,20,50); 
+            doc.text(`Администратор: ${admin}`,20,60);
+            doc.setDrawColor(251,191,36); 
+            doc.line(20,65,190,65);
 
-            doc.setFillColor(37,99,235,0.2); doc.roundedRect(20,75,170,25,3,3,'F');
-            doc.setTextColor(255,255,255); doc.setFontSize(12);
+            // Боқияи дирӯза
+            doc.setFillColor(37,99,235,0.2); 
+            doc.roundedRect(20,75,170,25,3,3,'F');
+            doc.setTextColor(255,255,255); 
+            doc.setFontSize(12);
             doc.text('📦 БОҚИЯИ ДИРӮЗА ДАР СЕЙФ', 25, 85);
             doc.text(`НАҚД: ${document.getElementById('safeCash').textContent}`, 25, 95);
             doc.text(`БЕЗНАЛ: ${document.getElementById('safeCashless').textContent}`, 110, 95);
 
             let yPos = 110;
-            doc.setTextColor(251,191,36); doc.text('Фурӯши имрӯза:',20,yPos); yPos+=10;
+            doc.setTextColor(251,191,36); 
+            doc.text('Фурӯши имрӯза:',20,yPos); yPos += 10;
             doc.setTextColor(255,255,255);
-            doc.text(`Умумӣ: ${document.getElementById('summaryTotal').textContent}`,30,yPos); yPos+=10;
-            doc.text(`Нақдӣ: ${document.getElementById('summaryCash').textContent}`,30,yPos); yPos+=10;
-            doc.text(`Безнал: ${document.getElementById('summaryCashless').textContent}`,30,yPos); yPos+=10;
+            doc.text(`Умумӣ: ${document.getElementById('summaryTotal').textContent}`,30,yPos); yPos += 10;
+            doc.text(`Нақдӣ: ${document.getElementById('summaryCash').textContent}`,30,yPos); yPos += 10;
+            doc.text(`Безнал: ${document.getElementById('summaryCashless').textContent}`,30,yPos); yPos += 10;
 
-            doc.setTextColor(251,191,36); doc.text('Бозгашт:',20,yPos); yPos+=10;
+            doc.setTextColor(251,191,36); 
+            doc.text('Бозгашт:',20,yPos); yPos += 10;
             doc.setTextColor(255,255,255);
-            doc.text(`Нақдӣ: ${document.getElementById('summaryReturnCash').textContent}`,30,yPos); yPos+=10;
-            doc.text(`Безнал: ${document.getElementById('summaryReturnCashless').textContent}`,30,yPos); yPos+=10;
+            doc.text(`Нақдӣ: ${document.getElementById('summaryReturnCash').textContent}`,30,yPos); yPos += 10;
+            doc.text(`Безнал: ${document.getElementById('summaryReturnCashless').textContent}`,30,yPos); yPos += 10;
 
-            doc.setTextColor(251,191,36); doc.text('Харҷҳо:',20,yPos); yPos+=10;
+            doc.setTextColor(251,191,36); 
+            doc.text('Харҷҳо:',20,yPos); yPos += 10;
             doc.setTextColor(255,255,255);
             const expensesList = document.getElementById('summaryExpensesList').children;
             if (!expensesList.length || expensesList[0]?.textContent === 'Харҷ нест') {
-                doc.text('Харҷ нест',30,yPos); yPos+=10;
+                doc.text('Харҷ нест',30,yPos); yPos += 10;
             } else {
-                for (let i=0; i<expensesList.length; i++) {
-                    doc.text(expensesList[i].textContent,30,yPos); yPos+=10;
-                    if (yPos>270) { doc.addPage(); yPos=20; }
+                for (let i = 0; i < expensesList.length; i++) {
+                    doc.text(expensesList[i].textContent,30,yPos); yPos += 10;
+                    if (yPos > 270) { 
+                        doc.addPage(); 
+                        yPos = 20; 
+                    }
                 }
             }
-            yPos+=10;
-            doc.setTextColor(251,191,36); doc.text('Боқия дар сейф (пас аз рӯз):',20,yPos); yPos+=10;
+            yPos += 10;
+            doc.setTextColor(251,191,36); 
+            doc.text('Боқия дар сейф (пас аз рӯз):',20,yPos); yPos += 10;
             doc.setTextColor(255,255,255);
-            doc.text(`НАҚД: ${document.getElementById('summarySafeCash').textContent}`,30,yPos); yPos+=10;
+            doc.text(`НАҚД: ${document.getElementById('summarySafeCash').textContent}`,30,yPos); yPos += 10;
             doc.text(`БЕЗНАЛ: ${document.getElementById('summarySafeCashless').textContent}`,30,yPos);
             return doc;
         }
@@ -1318,7 +1516,10 @@
                 const file = new File([blob], `hisobot_${shop}_${date}.pdf`, { type: 'application/pdf' });
                 
                 if (navigator.share && navigator.canShare?.({ files: [file] })) {
-                    await navigator.share({ title: `Ҳисоботи ${shop} барои ${date}`, files: [file] });
+                    await navigator.share({ 
+                        title: `Ҳисоботи ${shop} барои ${date}`, 
+                        files: [file] 
+                    });
                     showToast('✅ PDF фиристода шуд!');
                 } else {
                     showToast('❌ Фиристодан дастгирӣ намешавад', 'error');
@@ -1328,12 +1529,20 @@
             }
         }
 
-        // Шаги
+        // ============================================
+        // ШАГИ
+        // ============================================
         function nextStep(step) {
             if (step === 1) showScreen('dailyStep2');
             else if (step === 2) showScreen('dailyStep3');
-            else if (step === 3) { showScreen('dailyStep4'); renderCategories(); }
-            else if (step === 4) { calculateTotals(); showScreen('dailyStep5'); }
+            else if (step === 3) { 
+                showScreen('dailyStep4'); 
+                renderCategories(); 
+            }
+            else if (step === 4) { 
+                calculateTotals(); 
+                showScreen('dailyStep5'); 
+            }
         }
 
         function prevStep(step) {
@@ -1343,22 +1552,31 @@
             else if (step === 4) showScreen('dailyStep4');
         }
 
-        // Месячный отчёт
-        function changeMonth(delta) { currentDate.setMonth(currentDate.getMonth()+delta); updateMonthlyReport(); }
+        // ============================================
+        // МЕСЯЧНЫЙ ОТЧЁТ (с фильтром по магазину)
+        // ============================================
+        function changeMonth(delta) { 
+            currentDate.setMonth(currentDate.getMonth() + delta); 
+            updateMonthlyReport(); 
+        }
         
         function updateMonthlyReport() {
             const months = ['Январ','Феврал','Март','Апрел','Май','Июн','Июл','Август','Сентябр','Октябр','Ноябр','Декабр'];
-            document.getElementById('currentMonth').textContent = months[currentDate.getMonth()]+' '+currentDate.getFullYear();
+            document.getElementById('currentMonth').textContent = months[currentDate.getMonth()] + ' ' + currentDate.getFullYear();
+            
+            const filterStore = document.getElementById('monthlyStoreFilter').value;
             
             const monthReports = reports.filter(r => {
                 const d = new Date(r.date);
-                return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
+                const monthMatch = d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
+                const storeMatch = filterStore ? r.store === filterStore : true;
+                return monthMatch && storeMatch;
             }).sort((a,b) => new Date(a.date) - new Date(b.date));
             
-            document.getElementById('monthTotalSales').textContent = formatMoney(monthReports.reduce((s,r)=>s+(r.totalSales||0),0));
-            document.getElementById('monthTotalExpenses').textContent = formatMoney(monthReports.reduce((s,r)=>s+(r.totalExpenses||0),0));
-            document.getElementById('monthCash').textContent = formatMoney(monthReports.reduce((s,r)=>s+(r.cash||0),0));
-            document.getElementById('monthCashless').textContent = formatMoney(monthReports.reduce((s,r)=>s+(r.cashless||0),0));
+            document.getElementById('monthTotalSales').textContent = formatMoney(monthReports.reduce((s,r) => s + (r.totalSales || 0), 0));
+            document.getElementById('monthTotalExpenses').textContent = formatMoney(monthReports.reduce((s,r) => s + (r.totalExpenses || 0), 0));
+            document.getElementById('monthCash').textContent = formatMoney(monthReports.reduce((s,r) => s + (r.cash || 0), 0));
+            document.getElementById('monthCashless').textContent = formatMoney(monthReports.reduce((s,r) => s + (r.cashless || 0), 0));
             
             const tb = document.getElementById('monthlyTable');
             if (!monthReports.length) {
@@ -1374,19 +1592,32 @@
                 ).join('');
             }
             
-            // Категории
+            // Категории для отфильтрованных отчётов
             const catSums = {};
             monthReports.forEach(r => {
                 if (r.expenses) {
                     r.expenses.forEach(e => {
                         if (e.category) {
-                            const catName = getCategoryName(e.category);
-                            catSums[catName] = (catSums[catName] || 0) + (e.amount || 0);
+                            // Получаем имя категории из всех категорий (не только текущего магазина)
+                            db.collection('categories').doc(e.category).get().then(doc => {
+                                if (doc.exists) {
+                                    const catName = doc.data().name;
+                                    catSums[catName] = (catSums[catName] || 0) + (e.amount || 0);
+                                    renderCharts(catSums);
+                                }
+                            });
                         }
                     });
                 }
             });
             
+            // Если нет расходов, показываем пустой график
+            if (Object.keys(catSums).length === 0) {
+                renderCharts({});
+            }
+        }
+        
+        function renderCharts(catSums) {
             // График
             const chart = document.getElementById('expenseChart');
             if (Object.keys(catSums).length === 0) {
@@ -1394,36 +1625,46 @@
             } else {
                 const max = Math.max(...Object.values(catSums), 1);
                 chart.innerHTML = Object.entries(catSums).map(([k,v]) => 
-                    `<div class="bar-item"><div class="bar" style="height:${v/max*100}px;"></div><div class="bar-label">${k.substring(0,3)}</div></div>`
+                    `<div class="bar-item">
+                        <div class="bar" style="height:${v / max * 100}px;"></div>
+                        <div class="bar-label">${k.substring(0,3)}</div>
+                    </div>`
                 ).join('');
             }
             
             // Таблица категорий
-            const total = Object.values(catSums).reduce((a,b)=>a+b,0);
+            const total = Object.values(catSums).reduce((a,b) => a + b, 0);
             const catBody = document.getElementById('categoryTable');
             if (total === 0) {
                 catBody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:16px;">Харҷ нест</td></tr>';
             } else {
                 catBody.innerHTML = Object.entries(catSums)
-                    .sort((a,b)=>b[1]-a[1])
-                    .map(([k,v]) => `<tr><td>${k}</td><td>${formatMoney(v)}</td><td>${((v/total)*100).toFixed(1)}%</td></tr>`)
-                    .join('');
+                    .sort((a,b) => b[1] - a[1])
+                    .map(([k,v]) => 
+                        `<tr>
+                            <td>${k}</td>
+                            <td>${formatMoney(v)}</td>
+                            <td>${((v / total) * 100).toFixed(1)}%</td>
+                        </tr>`
+                    ).join('');
             }
         }
 
         function formatDate(ds) { 
             const d = new Date(ds); 
-            return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}`; 
+            return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth() + 1).toString().padStart(2,'0')}`; 
         }
 
-        // История
+        // ============================================
+        // ИСТОРИЯ
+        // ============================================
         function updateHistory() {
             let filtered = [...reports];
             const fd = document.getElementById('filterDate').value;
             const fs = document.getElementById('filterStore').value;
             if (fd) filtered = filtered.filter(r => r.date === fd);
             if (fs) filtered = filtered.filter(r => r.store === fs);
-            filtered.sort((a,b)=>new Date(b.date)-new Date(a.date));
+            filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
             
             const cont = document.getElementById('historyList');
             if (!filtered.length) { 
@@ -1433,20 +1674,27 @@
             
             cont.innerHTML = filtered.map(r => {
                 const d = new Date(r.date);
-                const ds = `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getFullYear()}`;
+                const ds = `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth() + 1).toString().padStart(2,'0')}.${d.getFullYear()}`;
                 return `<div class="history-item">
-                    <div class="header-row"><div class="date">${ds}</div><div class="store-badge">${r.store}</div></div>
+                    <div class="header-row">
+                        <div class="date">${ds}</div>
+                        <div class="store-badge">${r.store}</div>
+                    </div>
                     <div class="amounts">
                         <div><span class="label">Фурӯш:</span> ${formatMoney(r.totalSales)}</div>
                         <div><span class="label">Харҷ:</span> ${formatMoney(r.totalExpenses)}</div>
                     </div>
                     ${r.receiptImage ? `<img class="thumbnail" src="${r.receiptImage}" onclick="showImageModal('${r.receiptImage}')">` : ''}
-                    <div class="action-buttons"><button class="btn btn-danger" onclick="deleteReport('${r.id}')">Нест кардан</button></div>
+                    <div class="action-buttons">
+                        <button class="btn btn-danger" onclick="deleteReport('${r.id}')">Нест кардан</button>
+                    </div>
                 </div>`;
             }).join('');
         }
 
-        function filterHistory() { updateHistory(); }
+        function filterHistory() { 
+            updateHistory(); 
+        }
 
         async function deleteReport(id) {
             if (!confirm('Шумо мутмаин ҳастед?')) return;
@@ -1458,7 +1706,9 @@
             }
         }
 
-        // Modal
+        // ============================================
+        // MODAL
+        // ============================================
         function showImageModal(src) { 
             document.getElementById('modalImage').src = src; 
             document.getElementById('imageModal').classList.add('active'); 
@@ -1468,18 +1718,21 @@
             document.getElementById('imageModal').classList.remove('active'); 
         }
 
-        // Toast
-        function showToast(msg, type='success') {
+        // ============================================
+        // TOAST
+        // ============================================
+        function showToast(msg, type = 'success') {
             const t = document.getElementById('toast'); 
             t.textContent = msg; 
             t.classList.add('show'); 
-            t.classList.toggle('error', type==='error');
+            t.classList.toggle('error', type === 'error');
             setTimeout(() => t.classList.remove('show'), 3000);
         }
 
-        // Init
+        // ============================================
+        // INIT
+        // ============================================
         document.addEventListener('DOMContentLoaded', async () => {
-            await loadCategories();
             document.getElementById('stepDate').value = new Date().toISOString().split('T')[0];
             showScreen('storeScreen');
             document.getElementById('navBar').style.display = 'none';
