@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Hisoboti F-1 | F-5 | F-7</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Скрипты для скриншотов и ZIP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -870,7 +872,7 @@
             <div class="btn-nav" style="flex-direction:column; gap:10px;">
                 <div style="display:flex; gap:10px; width:100%;">
                     <button class="btn btn-secondary" onclick="prevStep(4)" style="flex:1;">← Ба ақиб</button>
-                    <button class="btn btn-pdf" onclick="sharePDF()" style="flex:1;">📤 Фиристодан</button>
+                    <button class="btn btn-pdf" onclick="shareReport()" style="flex:1;">📤 Фиристодан</button>
                 </div>
                 <button class="btn btn-success" onclick="saveDay()">💾 ТАСДИҚ</button>
             </div>
@@ -998,7 +1000,7 @@
 
     <script>
         // ============================================
-        // STATE
+        // STATE - ВСЕ ДАННЫЕ ХРАНЯТСЯ ЗДЕСЬ
         // ============================================
         let selectedStore = null;
         let currentDate = new Date();
@@ -1010,7 +1012,7 @@
         let hasReturn = false;
 
         // ============================================
-        // НАЧАЛЬНЫЕ ДАННЫЕ ПО СЕЙФАМ
+        // НАЧАЛЬНЫЕ ДАННЫЕ ПО СЕЙФАМ (НАВСЕГДА)
         // ============================================
         const initialSafeData = {
             'F-1': { cash: 60342, cashless: 479191 },
@@ -1019,56 +1021,76 @@
         };
 
         // ============================================
-        // ЗАГРУЗКА ИЗ LOCALSTORAGE
+        // ЗАГРУЗКА ИЗ LOCALSTORAGE (ДАННЫЕ НИКОГДА НЕ ИСЧЕЗНУТ)
         // ============================================
         function loadData() {
-            const savedReports = localStorage.getItem('reports');
-            if (savedReports) {
-                try {
+            // Загружаем отчёты
+            try {
+                const savedReports = localStorage.getItem('reports');
+                if (savedReports) {
                     reports = JSON.parse(savedReports);
-                } catch (e) {
+                    console.log('Загружено отчетов:', reports.length);
+                } else {
                     reports = [];
+                    console.log('Нет сохраненных отчетов');
                 }
+            } catch (e) {
+                console.error('Ошибка загрузки отчетов:', e);
+                reports = [];
             }
             
-            const savedCategories = localStorage.getItem('categories');
-            if (savedCategories) {
-                try {
+            // Загружаем категории
+            try {
+                const savedCategories = localStorage.getItem('categories');
+                if (savedCategories) {
                     categories = JSON.parse(savedCategories);
-                } catch (e) {
-                    categories = [];
+                    console.log('Загружено категорий:', categories.length);
+                } else {
+                    // Если категорий нет, создаём базовые
+                    categories = [
+                        { id: 'products_F-1', name: 'Маҳсулот', store: 'F-1' },
+                        { id: 'salary_F-1', name: 'Музд', store: 'F-1' },
+                        { id: 'rent_F-1', name: 'Иҷора', store: 'F-1' },
+                        { id: 'utilities_F-1', name: 'Коммунал', store: 'F-1' },
+                        { id: 'other_F-1', name: 'Дигар', store: 'F-1' },
+                        { id: 'products_F-5', name: 'Маҳсулот', store: 'F-5' },
+                        { id: 'salary_F-5', name: 'Музд', store: 'F-5' },
+                        { id: 'rent_F-5', name: 'Иҷора', store: 'F-5' },
+                        { id: 'utilities_F-5', name: 'Коммунал', store: 'F-5' },
+                        { id: 'other_F-5', name: 'Дигар', store: 'F-5' },
+                        { id: 'products_F-7', name: 'Маҳсулот', store: 'F-7' },
+                        { id: 'salary_F-7', name: 'Музд', store: 'F-7' },
+                        { id: 'rent_F-7', name: 'Иҷора', store: 'F-7' },
+                        { id: 'utilities_F-7', name: 'Коммунал', store: 'F-7' },
+                        { id: 'other_F-7', name: 'Дигар', store: 'F-7' }
+                    ];
+                    saveCategories();
                 }
-            }
-            
-            // Если категорий нет, создаём базовые
-            if (categories.length === 0) {
-                categories = [
-                    { id: 'products_F-1', name: 'Маҳсулот', store: 'F-1' },
-                    { id: 'salary_F-1', name: 'Музд', store: 'F-1' },
-                    { id: 'rent_F-1', name: 'Иҷора', store: 'F-1' },
-                    { id: 'utilities_F-1', name: 'Коммунал', store: 'F-1' },
-                    { id: 'other_F-1', name: 'Дигар', store: 'F-1' },
-                    { id: 'products_F-5', name: 'Маҳсулот', store: 'F-5' },
-                    { id: 'salary_F-5', name: 'Музд', store: 'F-5' },
-                    { id: 'rent_F-5', name: 'Иҷора', store: 'F-5' },
-                    { id: 'utilities_F-5', name: 'Коммунал', store: 'F-5' },
-                    { id: 'other_F-5', name: 'Дигар', store: 'F-5' },
-                    { id: 'products_F-7', name: 'Маҳсулот', store: 'F-7' },
-                    { id: 'salary_F-7', name: 'Музд', store: 'F-7' },
-                    { id: 'rent_F-7', name: 'Иҷора', store: 'F-7' },
-                    { id: 'utilities_F-7', name: 'Коммунал', store: 'F-7' },
-                    { id: 'other_F-7', name: 'Дигар', store: 'F-7' }
-                ];
-                saveCategories();
+            } catch (e) {
+                console.error('Ошибка загрузки категорий:', e);
+                categories = [];
             }
         }
 
+        // СОХРАНЕНИЕ ОТЧЁТОВ (МГНОВЕННОЕ)
         function saveReports() {
-            localStorage.setItem('reports', JSON.stringify(reports));
+            try {
+                localStorage.setItem('reports', JSON.stringify(reports));
+                console.log('Отчеты сохранены');
+            } catch (e) {
+                console.error('Ошибка сохранения отчетов:', e);
+                showToast('❌ Ошибка сохранения', 'error');
+            }
         }
 
+        // СОХРАНЕНИЕ КАТЕГОРИЙ
         function saveCategories() {
-            localStorage.setItem('categories', JSON.stringify(categories));
+            try {
+                localStorage.setItem('categories', JSON.stringify(categories));
+                console.log('Категории сохранены');
+            } catch (e) {
+                console.error('Ошибка сохранения категорий:', e);
+            }
         }
 
         // ============================================
@@ -1412,7 +1434,7 @@
             // Удаляем старый отчёт за эту дату, если есть
             reports = reports.filter(r => !(r.store === store && r.date === date));
             reports.push(report);
-            saveReports();
+            saveReports(); // МГНОВЕННОЕ СОХРАНЕНИЕ
             
             showToast('✅ Ҳисобот сабт шуд!');
             resetStepData();
@@ -1444,141 +1466,60 @@
         }
 
         // ============================================
-        // PDF (ИСПРАВЛЕННАЯ ВЕРСИЯ)
+        // ФУНКЦИЯ ДЛЯ ОТПРАВКИ СКРИНШОТА (НОВАЯ)
         // ============================================
-        function generatePDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            let y = 20;
-            
-            // Заголовок
-            doc.setFontSize(20);
-            doc.setTextColor(251, 191, 36);
-            doc.text('ҲИСОБОТИ РӮЗОНА', 105, y, { align: 'center' });
-            y += 15;
-            
-            // Информация о магазине
-            doc.setFontSize(14);
-            doc.setTextColor(255, 255, 255);
-            const shop = document.getElementById('summaryShop').textContent;
-            const date = document.getElementById('summaryDate').textContent;
-            const admin = document.getElementById('summaryAdmin').textContent;
-            doc.text(`Магазин: ${shop}`, 20, y);
-            y += 10;
-            doc.text(`Сана: ${date}`, 20, y);
-            y += 10;
-            doc.text(`Администратор: ${admin}`, 20, y);
-            y += 10;
-            
-            // Линия
-            doc.setDrawColor(251, 191, 36);
-            doc.line(20, y, 190, y);
-            y += 10;
-            
-            // Боқияи дирӯза
-            doc.setFontSize(12);
-            doc.setTextColor(37, 99, 235);
-            doc.text('📦 БОҚИЯИ ДИРӮЗА ДАР СЕЙФ', 20, y);
-            y += 8;
-            doc.setTextColor(255, 255, 255);
-            doc.text(`НАҚД: ${document.getElementById('safeCash').textContent}`, 30, y);
-            y += 8;
-            doc.text(`БЕЗНАЛ: ${document.getElementById('safeCashless').textContent}`, 30, y);
-            y += 12;
-            
-            // Фурӯш
-            doc.setTextColor(251, 191, 36);
-            doc.text('💰 Фурӯши имрӯза:', 20, y);
-            y += 8;
-            doc.setTextColor(255, 255, 255);
-            doc.text(`Умумӣ: ${document.getElementById('summaryTotal').textContent}`, 30, y);
-            y += 8;
-            doc.text(`Нақдӣ: ${document.getElementById('summaryCash').textContent}`, 30, y);
-            y += 8;
-            doc.text(`Безнал: ${document.getElementById('summaryCashless').textContent}`, 30, y);
-            y += 12;
-            
-            // Бозгашт
-            doc.setTextColor(251, 191, 36);
-            doc.text('↩️ Бозгашт:', 20, y);
-            y += 8;
-            doc.setTextColor(255, 255, 255);
-            doc.text(`Нақдӣ: ${document.getElementById('summaryReturnCash').textContent}`, 30, y);
-            y += 8;
-            doc.text(`Безнал: ${document.getElementById('summaryReturnCashless').textContent}`, 30, y);
-            y += 12;
-            
-            // Харҷҳо
-            doc.setTextColor(251, 191, 36);
-            doc.text('📉 Харҷҳо:', 20, y);
-            y += 8;
-            doc.setTextColor(255, 255, 255);
-            
-            const expensesList = document.getElementById('summaryExpensesList').children;
-            if (!expensesList.length || expensesList[0]?.textContent === 'Харҷ нест') {
-                doc.text('Харҷ нест', 30, y);
-                y += 10;
-            } else {
-                for (let i = 0; i < expensesList.length; i++) {
-                    const text = expensesList[i].textContent;
-                    const shortText = text.length > 50 ? text.substring(0, 47) + '...' : text;
-                    doc.text(shortText, 30, y);
-                    y += 8;
-                    
-                    if (y > 280) {
-                        doc.addPage();
-                        y = 20;
-                        doc.setTextColor(255, 255, 255);
-                    }
-                }
-                y += 4;
-            }
-            
-            // Боқия дар сейф
-            y += 4;
-            doc.setTextColor(251, 191, 36);
-            doc.text('🏦 Боқия дар сейф (пас аз рӯз):', 20, y);
-            y += 8;
-            doc.setTextColor(255, 255, 255);
-            doc.text(`НАҚД: ${document.getElementById('summarySafeCash').textContent}`, 30, y);
-            y += 8;
-            doc.text(`БЕЗНАЛ: ${document.getElementById('summarySafeCashless').textContent}`, 30, y);
-            
-            return doc;
-        }
-
-        async function sharePDF() {
+        async function shareReport() {
             try {
-                showToast('⏳ Тайёр кардани PDF...', 'info');
-                const doc = generatePDF();
-                const blob = doc.output('blob');
+                showToast('⏳ Тайёр кардани ҳисобот...', 'info');
+                
+                // Создаём скриншот
+                const element = document.getElementById('summaryBlock');
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    backgroundColor: '#0f2a3f',
+                    logging: false
+                });
+                
+                // Создаём ZIP архив
+                const zip = new JSZip();
+                
+                // Добавляем скриншот
+                const screenshotData = canvas.toDataURL('image/png').split(',')[1];
                 const shop = document.getElementById('summaryShop').textContent;
                 const date = document.getElementById('summaryDate').textContent.replace(/\./g, '-');
-                const fileName = `hisobot_${shop}_${date}.pdf`;
-                const file = new File([blob], fileName, { type: 'application/pdf' });
+                zip.file(`hisobot_${shop}_${date}.png`, screenshotData, { base64: true });
                 
-                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                // Добавляем фото чека если есть
+                if (stepReceiptImage) {
+                    const receiptData = stepReceiptImage.split(',')[1];
+                    zip.file(`chek_${shop}_${date}.jpg`, receiptData, { base64: true });
+                }
+                
+                // Создаём ZIP файл
+                const zipBlob = await zip.generateAsync({ type: 'blob' });
+                const zipFile = new File([zipBlob], `hisobot_${shop}_${date}.zip`, { type: 'application/zip' });
+                
+                // Отправляем
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [zipFile] })) {
                     await navigator.share({
                         title: `Ҳисоботи ${shop} барои ${date}`,
-                        files: [file]
+                        files: [zipFile]
                     });
-                    showToast('✅ PDF фиристода шуд!');
+                    showToast('✅ Ҳисобот фиристода шуд!');
                 } else {
-                    doc.save(fileName);
-                    showToast('✅ PDF зеркашӣ шуд');
+                    // Если нельзя отправить, скачиваем
+                    const url = URL.createObjectURL(zipBlob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `hisobot_${shop}_${date}.zip`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    showToast('✅ Архив зеркашӣ шуд');
                 }
-            } catch (e) {
-                console.error(e);
-                try {
-                    const doc = generatePDF();
-                    const shop = document.getElementById('summaryShop').textContent;
-                    const date = document.getElementById('summaryDate').textContent.replace(/\./g, '-');
-                    doc.save(`hisobot_${shop}_${date}.pdf`);
-                    showToast('✅ PDF зеркашӣ шуд');
-                } catch (e2) {
-                    showToast('❌ Хато дар сохтани PDF', 'error');
-                }
+                
+            } catch (error) {
+                console.error('Share error:', error);
+                showToast('❌ Хато ҳангоми фиристодан', 'error');
             }
         }
 
@@ -1739,7 +1680,7 @@
         function deleteReport(id) {
             if (!confirm('Шумо мутмаин ҳастед?')) return;
             reports = reports.filter(r => r.id !== id);
-            saveReports();
+            saveReports(); // Сохраняем после удаления
             updateHistory();
             updateMonthlyReport();
             showToast('✅ Ҳисобот нест шуд');
@@ -1769,10 +1710,10 @@
         }
 
         // ============================================
-        // INIT
+        // INIT - ЗАГРУЗКА ДАННЫХ ПРИ СТАРТЕ
         // ============================================
         document.addEventListener('DOMContentLoaded', () => {
-            loadData();
+            loadData(); // Загружаем все сохранённые данные
             document.getElementById('stepDate').value = new Date().toISOString().split('T')[0];
             showScreen('storeScreen');
             document.getElementById('navBar').style.display = 'none';
