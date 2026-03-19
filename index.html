@@ -318,6 +318,10 @@
         .yesno-buttons .yes-btn { background: var(--success); color: white; }
         .yesno-buttons .no-btn { background: var(--danger); color: white; }
         .yesno-buttons button:active { transform: scale(0.95); }
+        .yesno-buttons button.selected { 
+            transform: scale(1.05); 
+            box-shadow: 0 0 20px currentColor; 
+        }
 
         .return-fields { display: none; margin-top: 20px; }
         .return-fields.show { display: block; }
@@ -763,51 +767,114 @@
 
         <!-- Шаг 1: Маълумоти рӯз -->
         <div id="dailyStep1" class="screen">
-            <div class="progress-bar"><div class="progress-step active">1</div><div class="progress-step">2</div><div class="progress-step">3</div><div class="progress-step">4</div><div class="progress-step">5</div></div>
+            <div class="progress-bar">
+                <div class="progress-step active">1</div>
+                <div class="progress-step">2</div>
+                <div class="progress-step">3</div>
+                <div class="progress-step">4</div>
+                <div class="progress-step">5</div>
+            </div>
             <div class="step-content">
                 <div class="step-title">📋 Маълумоти рӯз</div>
-                <div class="info-row"><span class="info-label">Магазин:</span><span class="info-value" id="stepStore">F-1</span></div>
-                <div class="input-group"><label class="input-label">Сана</label><input type="date" class="input-field" id="stepDate" onchange="updateStepDate()"></div>
-                <div class="input-group"><label class="input-label">Номи администратор</label><input type="text" class="input-field" id="stepAdmin" placeholder="Номи худро ворид кунед"></div>
+                <div class="info-row">
+                    <span class="info-label">Магазин:</span>
+                    <span class="info-value" id="stepStore">F-1</span>
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Сана</label>
+                    <input type="date" class="input-field" id="stepDate" onchange="updateStepDate()">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Номи администратор</label>
+                    <input type="text" class="input-field" id="stepAdmin" placeholder="Номи худро ворид кунед">
+                </div>
             </div>
-            <div class="btn-nav"><button class="btn btn-secondary" onclick="goToMainMenu()">🏠 Меню</button><button class="btn btn-primary" onclick="nextStep(1)">Давом →</button></div>
+            <div class="btn-nav">
+                <button class="btn btn-secondary" onclick="goToMainMenu()">🏠 Меню</button>
+                <button class="btn btn-primary" onclick="nextStep(1)">Давом →</button>
+            </div>
         </div>
 
         <!-- Шаг 2: Чеки -->
         <div id="dailyStep2" class="screen">
-            <div class="progress-bar"><div class="progress-step completed">1</div><div class="progress-step active">2</div><div class="progress-step">3</div><div class="progress-step">4</div><div class="progress-step">5</div></div>
+            <div class="progress-bar">
+                <div class="progress-step completed">1</div>
+                <div class="progress-step active">2</div>
+                <div class="progress-step">3</div>
+                <div class="progress-step">4</div>
+                <div class="progress-step">5</div>
+            </div>
             <div class="step-content">
                 <div class="step-title">💰 Фурӯши рӯз</div>
-                <div class="amount-card"><div class="card-label">Чеки умумӣ</div><input type="number" class="card-input" id="stepTotal" placeholder="0" oninput="calculateStepCash()"></div>
-                <div class="amount-card"><div class="card-label">Безнал</div><input type="number" class="card-input" id="stepCashless" placeholder="0" oninput="calculateStepCash()"></div>
-                <div class="amount-card calculated"><div class="card-label">Нақдӣ</div><input type="number" class="card-input" id="stepCash" placeholder="0" readonly></div>
+                <div class="amount-card">
+                    <div class="card-label">Чеки умумӣ</div>
+                    <input type="number" class="card-input" id="stepTotal" placeholder="0" oninput="calculateStepCash()">
+                </div>
+                <div class="amount-card">
+                    <div class="card-label">Безнал</div>
+                    <input type="number" class="card-input" id="stepCashless" placeholder="0" oninput="calculateStepCash()">
+                </div>
+                <div class="amount-card calculated">
+                    <div class="card-label">Нақдӣ</div>
+                    <input type="number" class="card-input" id="stepCash" placeholder="0" readonly>
+                </div>
                 <div class="photo-upload" id="stepPhotoUpload" onclick="selectStepPhoto()">
-                    <div class="upload-content" id="stepUploadContent"><div class="upload-icon">📷</div><div class="upload-text">Акси чекро прикреп кунед</div></div>
+                    <div class="upload-content" id="stepUploadContent">
+                        <div class="upload-icon">📷</div>
+                        <div class="upload-text">Акси чекро прикреп кунед</div>
+                    </div>
                 </div>
                 <input type="file" id="stepReceiptPhoto" accept="image/*" style="display:none;" onchange="onStepPhotoSelected(event)">
             </div>
-            <div class="btn-nav"><button class="btn btn-secondary" onclick="prevStep(1)">← Ба ақиб</button><button class="btn btn-primary" onclick="nextStep(2)">Давом →</button></div>
+            <div class="btn-nav">
+                <button class="btn btn-secondary" onclick="prevStep(1)">← Ба ақиб</button>
+                <button class="btn btn-primary" onclick="nextStep(2)">Давом →</button>
+            </div>
         </div>
 
         <!-- Шаг 3: Возврат -->
         <div id="dailyStep3" class="screen">
-            <div class="progress-bar"><div class="progress-step completed">1</div><div class="progress-step completed">2</div><div class="progress-step active">3</div><div class="progress-step">4</div><div class="progress-step">5</div></div>
+            <div class="progress-bar">
+                <div class="progress-step completed">1</div>
+                <div class="progress-step completed">2</div>
+                <div class="progress-step active">3</div>
+                <div class="progress-step">4</div>
+                <div class="progress-step">5</div>
+            </div>
             <div class="step-content">
                 <div class="step-title">↩️ Бозгашти пул</div>
-                <div class="yesno-buttons"><button class="yes-btn" onclick="showReturnFields(true)">ҲА</button><button class="no-btn" onclick="showReturnFields(false)">НЕ</button></div>
+                <div class="yesno-buttons">
+                    <button class="yes-btn" onclick="showReturnFields(true)">ҲА</button>
+                    <button class="no-btn" onclick="showReturnFields(false)">НЕ</button>
+                </div>
                 <div id="returnFields" class="return-fields">
                     <div class="return-grid">
-                        <div class="amount-card"><div class="card-label">Нақдӣ</div><input type="number" class="card-input" id="stepReturnCash" placeholder="0" oninput="calculateTotals()"></div>
-                        <div class="amount-card"><div class="card-label">Безнал</div><input type="number" class="card-input" id="stepReturnCashless" placeholder="0" oninput="calculateTotals()"></div>
+                        <div class="amount-card">
+                            <div class="card-label">Нақдӣ</div>
+                            <input type="number" class="card-input" id="stepReturnCash" placeholder="0" oninput="calculateTotals()">
+                        </div>
+                        <div class="amount-card">
+                            <div class="card-label">Безнал</div>
+                            <input type="number" class="card-input" id="stepReturnCashless" placeholder="0" oninput="calculateTotals()">
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="btn-nav"><button class="btn btn-secondary" onclick="prevStep(2)">← Ба ақиб</button><button class="btn btn-primary" onclick="nextStep(3)">Давом →</button></div>
+            <div class="btn-nav">
+                <button class="btn btn-secondary" onclick="prevStep(2)">← Ба ақиб</button>
+                <button class="btn btn-primary" onclick="nextStep(3)">Давом →</button>
+            </div>
         </div>
 
         <!-- Шаг 4: Расходы -->
         <div id="dailyStep4" class="screen">
-            <div class="progress-bar"><div class="progress-step completed">1</div><div class="progress-step completed">2</div><div class="progress-step completed">3</div><div class="progress-step active">4</div><div class="progress-step">5</div></div>
+            <div class="progress-bar">
+                <div class="progress-step completed">1</div>
+                <div class="progress-step completed">2</div>
+                <div class="progress-step completed">3</div>
+                <div class="progress-step active">4</div>
+                <div class="progress-step">5</div>
+            </div>
             <div class="step-content">
                 <div class="step-title">📉 Харҷҳо</div>
                 <div class="categories-section">
@@ -824,12 +891,21 @@
                 <div id="expensesList"></div>
                 <div class="add-expense-btn" onclick="addExpense()">+ Иловаи харҷ</div>
             </div>
-            <div class="btn-nav"><button class="btn btn-secondary" onclick="prevStep(3)">← Ба ақиб</button><button class="btn btn-primary" onclick="nextStep(4)">Давом →</button></div>
+            <div class="btn-nav">
+                <button class="btn btn-secondary" onclick="prevStep(3)">← Ба ақиб</button>
+                <button class="btn btn-primary" onclick="nextStep(4)">Давом →</button>
+            </div>
         </div>
 
         <!-- Шаг 5: Натиҷаи рӯз -->
         <div id="dailyStep5" class="screen">
-            <div class="progress-bar"><div class="progress-step completed">1</div><div class="progress-step completed">2</div><div class="progress-step completed">3</div><div class="progress-step completed">4</div><div class="progress-step active">5</div></div>
+            <div class="progress-bar">
+                <div class="progress-step completed">1</div>
+                <div class="progress-step completed">2</div>
+                <div class="progress-step completed">3</div>
+                <div class="progress-step completed">4</div>
+                <div class="progress-step active">5</div>
+            </div>
             <div class="step-content">
                 <div class="step-title">📊 Натиҷаи рӯз</div>
                 <div class="summary-block" id="summaryBlock">
@@ -960,8 +1036,8 @@
     </div>
 
     <!-- Navigation Bar -->
-    <nav class="nav-bar" id="navBar" style="display:none;">
-        <div class="nav-item active" onclick="showScreen('dailyStep1')">
+    <nav class="nav-bar" id="navBar" style="display: none;">
+        <div class="nav-item" onclick="showScreen('dailyStep1')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -1012,7 +1088,7 @@
         let hasReturn = false;
 
         // ============================================
-        // НАЧАЛЬНЫЕ ДАННЫЕ ПО СЕЙФАМ (НАВСЕГДА)
+        // НАЧАЛЬНЫЕ ДАННЫЕ ПО СЕЙФАМ
         // ============================================
         const initialSafeData = {
             'F-1': { cash: 60342, cashless: 479191 },
@@ -1021,30 +1097,24 @@
         };
 
         // ============================================
-        // ЗАГРУЗКА ИЗ LOCALSTORAGE (ДАННЫЕ НИКОГДА НЕ ИСЧЕЗНУТ)
+        // ЗАГРУЗКА ИЗ LOCALSTORAGE
         // ============================================
         function loadData() {
-            // Загружаем отчёты
             try {
                 const savedReports = localStorage.getItem('reports');
                 if (savedReports) {
                     reports = JSON.parse(savedReports);
-                    console.log('Загружено отчетов:', reports.length);
                 } else {
                     reports = [];
-                    console.log('Нет сохраненных отчетов');
                 }
             } catch (e) {
-                console.error('Ошибка загрузки отчетов:', e);
                 reports = [];
             }
             
-            // Загружаем категории
             try {
                 const savedCategories = localStorage.getItem('categories');
                 if (savedCategories) {
                     categories = JSON.parse(savedCategories);
-                    console.log('Загружено категорий:', categories.length);
                 } else {
                     // Если категорий нет, создаём базовые
                     categories = [
@@ -1067,30 +1137,22 @@
                     saveCategories();
                 }
             } catch (e) {
-                console.error('Ошибка загрузки категорий:', e);
                 categories = [];
             }
         }
 
-        // СОХРАНЕНИЕ ОТЧЁТОВ (МГНОВЕННОЕ)
         function saveReports() {
             try {
                 localStorage.setItem('reports', JSON.stringify(reports));
-                console.log('Отчеты сохранены');
             } catch (e) {
-                console.error('Ошибка сохранения отчетов:', e);
                 showToast('❌ Ошибка сохранения', 'error');
             }
         }
 
-        // СОХРАНЕНИЕ КАТЕГОРИЙ
         function saveCategories() {
             try {
                 localStorage.setItem('categories', JSON.stringify(categories));
-                console.log('Категории сохранены');
-            } catch (e) {
-                console.error('Ошибка сохранения категорий:', e);
-            }
+            } catch (e) {}
         }
 
         // ============================================
@@ -1107,10 +1169,19 @@
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
-            if (screenId === 'monthlyReportScreen') {
+            
+            // Обновляем активный пункт в навигации
+            document.querySelectorAll('.nav-item').forEach((item, index) => {
+                item.classList.remove('active');
+            });
+            
+            if (screenId === 'dailyStep1' || screenId === 'dailyStep2' || screenId === 'dailyStep3' || screenId === 'dailyStep4' || screenId === 'dailyStep5') {
+                document.querySelectorAll('.nav-item')[0].classList.add('active');
+            } else if (screenId === 'monthlyReportScreen') {
+                document.querySelectorAll('.nav-item')[1].classList.add('active');
                 updateMonthlyReport();
-            }
-            if (screenId === 'historyScreen') {
+            } else if (screenId === 'historyScreen') {
+                document.querySelectorAll('.nav-item')[2].classList.add('active');
                 updateHistory();
             }
         }
@@ -1130,6 +1201,9 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('stepDate').value = today;
             updateStepDate();
+            
+            // Очищаем поле администратора
+            document.getElementById('stepAdmin').value = '';
             
             // Загружаем категории для этого магазина
             renderCategories();
@@ -1325,7 +1399,7 @@
         }
 
         // ============================================
-        // РАСЧЁТЫ
+        // ШАГ 5: Натиҷаи рӯз (исправленная версия с именем администратора)
         // ============================================
         function calculateTotals() {
             const total = parseFloat(document.getElementById('stepTotal').value) || 0;
@@ -1351,6 +1425,12 @@
             const finalCash = Math.max(0, safeCash + cash - expenseCash - returnCash);
             const finalCashless = Math.max(0, safeCashless + cashless - expenseCashless - returnCashless);
             
+            // Получаем имя администратора из шага 1
+            const adminName = document.getElementById('stepAdmin').value || 'Админ';
+            
+            // Обновляем все поля в шаге 5
+            document.getElementById('summaryShop').textContent = selectedStore;
+            document.getElementById('summaryAdmin').textContent = adminName;
             document.getElementById('summaryTotal').textContent = formatMoney(total);
             document.getElementById('summaryCash').textContent = formatMoney(cash);
             document.getElementById('summaryCashless').textContent = formatMoney(cashless);
@@ -1434,7 +1514,7 @@
             // Удаляем старый отчёт за эту дату, если есть
             reports = reports.filter(r => !(r.store === store && r.date === date));
             reports.push(report);
-            saveReports(); // МГНОВЕННОЕ СОХРАНЕНИЕ
+            saveReports();
             
             showToast('✅ Ҳисобот сабт шуд!');
             resetStepData();
@@ -1466,7 +1546,7 @@
         }
 
         // ============================================
-        // ФУНКЦИЯ ДЛЯ ОТПРАВКИ СКРИНШОТА (НОВАЯ)
+        // ФУНКЦИЯ ДЛЯ ОТПРАВКИ СКРИНШОТА
         // ============================================
         async function shareReport() {
             try {
@@ -1680,7 +1760,7 @@
         function deleteReport(id) {
             if (!confirm('Шумо мутмаин ҳастед?')) return;
             reports = reports.filter(r => r.id !== id);
-            saveReports(); // Сохраняем после удаления
+            saveReports();
             updateHistory();
             updateMonthlyReport();
             showToast('✅ Ҳисобот нест шуд');
@@ -1710,10 +1790,10 @@
         }
 
         // ============================================
-        // INIT - ЗАГРУЗКА ДАННЫХ ПРИ СТАРТЕ
+        // INIT
         // ============================================
         document.addEventListener('DOMContentLoaded', () => {
-            loadData(); // Загружаем все сохранённые данные
+            loadData();
             document.getElementById('stepDate').value = new Date().toISOString().split('T')[0];
             showScreen('storeScreen');
             document.getElementById('navBar').style.display = 'none';
