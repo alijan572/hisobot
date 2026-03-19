@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Hisoboti F-1 | F-5 | F-7</title>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * {
@@ -1000,20 +997,6 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // 🔥 FIREBASE КОНФИГУРАЦИЯ
-        const firebaseConfig = {
-            apiKey: "AIzaSyDqDs4QxH0jhtFvFqtR20b5lbRKGAyQV6U",
-            authDomain: "hisobot-app-914ce.firebaseapp.com",
-            projectId: "hisobot-app-914ce",
-            storageBucket: "hisobot-app-914ce.firebasestorage.app",
-            messagingSenderId: "306527113905",
-            appId: "1:306527113905:web:58c93a7a850a8403d04890"
-        };
-
-        // Инициализация Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
         // ============================================
         // STATE
         // ============================================
@@ -1027,7 +1010,7 @@
         let hasReturn = false;
 
         // ============================================
-        // НАЧАЛЬНЫЕ ДАННЫЕ ПО СЕЙФАМ (ОБНОВЛЁННЫЕ)
+        // НАЧАЛЬНЫЕ ДАННЫЕ ПО СЕЙФАМ
         // ============================================
         const initialSafeData = {
             'F-1': { cash: 60342, cashless: 479191 },
@@ -1036,50 +1019,47 @@
         };
 
         // ============================================
-        // ЗАГРУЗКА КАТЕГОРИЙ ДЛЯ ТЕКУЩЕГО МАГАЗИНА
+        // ЗАГРУЗКА ИЗ LOCALSTORAGE
         // ============================================
-        async function loadCategories() {
-            if (!selectedStore) return;
-            
-            const snapshot = await db.collection('categories')
-                .where('store', '==', selectedStore)
-                .get();
-                
-            if (snapshot.empty) {
-                // Создаём базовые категории для этого магазина
-                const baseCats = [
-                    { store: selectedStore, name: 'Маҳсулот' },
-                    { store: selectedStore, name: 'Музд' },
-                    { store: selectedStore, name: 'Иҷора' },
-                    { store: selectedStore, name: 'Коммунал' },
-                    { store: selectedStore, name: 'Дигар' }
-                ];
-                for (let cat of baseCats) {
-                    await db.collection('categories').add(cat);
-                }
-                // Загружаем снова
-                const newSnapshot = await db.collection('categories')
-                    .where('store', '==', selectedStore)
-                    .get();
-                categories = newSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            } else {
-                categories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        function loadData() {
+            const savedReports = localStorage.getItem('reports');
+            if (savedReports) {
+                reports = JSON.parse(savedReports);
             }
-            renderCategories();
+            
+            const savedCategories = localStorage.getItem('categories');
+            if (savedCategories) {
+                categories = JSON.parse(savedCategories);
+            } else {
+                // Базовые категории для каждого магазина
+                categories = [
+                    { id: 'products', name: 'Маҳсулот', store: 'F-1' },
+                    { id: 'salary', name: 'Музд', store: 'F-1' },
+                    { id: 'rent', name: 'Иҷора', store: 'F-1' },
+                    { id: 'utilities', name: 'Коммунал', store: 'F-1' },
+                    { id: 'other', name: 'Дигар', store: 'F-1' },
+                    { id: 'products5', name: 'Маҳсулот', store: 'F-5' },
+                    { id: 'salary5', name: 'Музд', store: 'F-5' },
+                    { id: 'rent5', name: 'Иҷора', store: 'F-5' },
+                    { id: 'utilities5', name: 'Коммунал', store: 'F-5' },
+                    { id: 'other5', name: 'Дигар', store: 'F-5' },
+                    { id: 'products7', name: 'Маҳсулот', store: 'F-7' },
+                    { id: 'salary7', name: 'Музд', store: 'F-7' },
+                    { id: 'rent7', name: 'Иҷора', store: 'F-7' },
+                    { id: 'utilities7', name: 'Коммунал', store: 'F-7' },
+                    { id: 'other7', name: 'Дигар', store: 'F-7' }
+                ];
+                saveCategories();
+            }
         }
 
-        // ============================================
-        // ПОДПИСКА НА ОТЧЁТЫ
-        // ============================================
-        db.collection('reports').onSnapshot(snapshot => {
-            reports = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            if (document.getElementById('monthlyReportScreen').classList.contains('active')) {
-                updateMonthlyReport();
-            }
-            if (document.getElementById('historyScreen').classList.contains('active')) {
-                updateHistory();
-            }
-        });
+        function saveReports() {
+            localStorage.setItem('reports', JSON.stringify(reports));
+        }
+
+        function saveCategories() {
+            localStorage.setItem('categories', JSON.stringify(categories));
+        }
 
         // ============================================
         // НАВИГАЦИЯ
@@ -1110,7 +1090,7 @@
             document.getElementById('continueBtn').classList.add('visible');
         }
 
-        async function goToDailyReport() {
+        function goToDailyReport() {
             if (!selectedStore) return;
             resetStepData();
             document.getElementById('stepStore').textContent = selectedStore;
@@ -1120,28 +1100,50 @@
             updateStepDate();
             
             // Загружаем категории для этого магазина
-            await loadCategories();
+            loadCategoriesForStore();
             
             // Загружаем остатки прошлого дня
-            const prevDate = new Date(today);
-            prevDate.setDate(prevDate.getDate() - 1);
-            const prevId = `${selectedStore}_${prevDate.toISOString().split('T')[0]}`;
-            
-            db.collection('reports').doc(prevId).get().then(doc => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    document.getElementById('safeCash').textContent = formatMoney(data.safeCash || 0);
-                    document.getElementById('safeCashless').textContent = formatMoney(data.safeCashless || 0);
-                } else {
-                    // Используем обновлённые начальные данные
-                    const initialData = initialSafeData[selectedStore] || { cash: 0, cashless: 0 };
-                    document.getElementById('safeCash').textContent = formatMoney(initialData.cash);
-                    document.getElementById('safeCashless').textContent = formatMoney(initialData.cashless);
-                }
-            });
+            loadPreviousDayBalance();
             
             showScreen('dailyStep1');
             document.getElementById('navBar').style.display = 'flex';
+        }
+
+        function loadCategoriesForStore() {
+            const storeCategories = categories.filter(c => c.store === selectedStore);
+            if (storeCategories.length === 0) {
+                // Если нет категорий, создаём базовые для этого магазина
+                const newCategories = [
+                    { id: `products_${selectedStore}`, name: 'Маҳсулот', store: selectedStore },
+                    { id: `salary_${selectedStore}`, name: 'Музд', store: selectedStore },
+                    { id: `rent_${selectedStore}`, name: 'Иҷора', store: selectedStore },
+                    { id: `utilities_${selectedStore}`, name: 'Коммунал', store: selectedStore },
+                    { id: `other_${selectedStore}`, name: 'Дигар', store: selectedStore }
+                ];
+                categories = [...categories, ...newCategories];
+                saveCategories();
+                renderCategories();
+            } else {
+                renderCategories();
+            }
+        }
+
+        function loadPreviousDayBalance() {
+            const date = document.getElementById('stepDate').value;
+            const prevDate = new Date(date);
+            prevDate.setDate(prevDate.getDate() - 1);
+            const prevDateStr = prevDate.toISOString().split('T')[0];
+            
+            const prevReport = reports.find(r => r.store === selectedStore && r.date === prevDateStr);
+            
+            if (prevReport) {
+                document.getElementById('safeCash').textContent = formatMoney(prevReport.safeCash || 0);
+                document.getElementById('safeCashless').textContent = formatMoney(prevReport.safeCashless || 0);
+            } else {
+                const initialData = initialSafeData[selectedStore] || { cash: 0, cashless: 0 };
+                document.getElementById('safeCash').textContent = formatMoney(initialData.cash);
+                document.getElementById('safeCashless').textContent = formatMoney(initialData.cashless);
+            }
         }
 
         // ============================================
@@ -1196,7 +1198,10 @@
         function renderCategories() {
             const container = document.getElementById('categoriesList');
             if (!container) return;
-            container.innerHTML = categories.map(cat => 
+            
+            const storeCategories = categories.filter(c => c.store === selectedStore);
+            
+            container.innerHTML = storeCategories.map(cat => 
                 `<div class="category-tag ${selectedCategory === cat.id ? 'selected' : ''}" onclick="selectCategory('${cat.id}')">
                     ${cat.name}
                     <span class="remove-cat" onclick="event.stopPropagation(); removeCategory('${cat.id}')">×</span>
@@ -1209,7 +1214,7 @@
             f.style.display = f.style.display === 'none' ? 'flex' : 'none';
         }
 
-        async function addCategory() {
+        function addCategory() {
             const inp = document.getElementById('newCategoryName');
             const name = inp.value.trim();
             if (!name) { 
@@ -1221,32 +1226,30 @@
                 return; 
             }
             
-            try {
-                await db.collection('categories').add({
-                    store: selectedStore,
-                    name: name
-                });
-                showToast('✅ Категория илова шуд');
-                inp.value = '';
-                toggleCategoryForm();
-            } catch (error) {
-                showToast('❌ Хато', 'error');
-            }
+            const newId = `cat_${Date.now()}`;
+            categories.push({
+                id: newId,
+                name: name,
+                store: selectedStore
+            });
+            saveCategories();
+            renderCategories();
+            inp.value = '';
+            toggleCategoryForm();
+            showToast('✅ Категория илова шуд');
         }
 
-        async function removeCategory(id) {
+        function removeCategory(id) {
             if (stepExpenses.some(e => e.category === id)) { 
                 showToast('Ин категория дар харҷҳо истифода шудааст'); 
                 return; 
             }
             
-            try {
-                await db.collection('categories').doc(id).delete();
-                if (selectedCategory === id) selectedCategory = null;
-                showToast('✅ Категория нест шуд');
-            } catch (error) {
-                showToast('❌ Хато', 'error');
-            }
+            categories = categories.filter(c => c.id !== id);
+            saveCategories();
+            if (selectedCategory === id) selectedCategory = null;
+            renderCategories();
+            showToast('✅ Категория нест шуд');
         }
 
         function selectCategory(id) {
@@ -1254,18 +1257,13 @@
             renderCategories();
         }
 
-        // Подписка на изменения категорий
-        db.collection('categories').onSnapshot(() => {
-            if (selectedStore) {
-                loadCategories();
-            }
-        });
-
         // ============================================
         // РАСХОДЫ
         // ============================================
         function addExpense() {
-            const defaultCategory = categories.length > 0 ? categories[0].id : null;
+            const storeCategories = categories.filter(c => c.store === selectedStore);
+            const defaultCategory = storeCategories.length > 0 ? storeCategories[0].id : null;
+            
             stepExpenses.push({ 
                 id: Date.now(), 
                 type: 'cash', 
@@ -1293,8 +1291,11 @@
                 container.innerHTML = ''; 
                 return; 
             }
+            
+            const storeCategories = categories.filter(c => c.store === selectedStore);
+            
             container.innerHTML = stepExpenses.map(exp => {
-                const opts = categories.map(c => 
+                const opts = storeCategories.map(c => 
                     `<option value="${c.id}" ${exp.category === c.id ? 'selected' : ''}>${c.name}</option>`
                 ).join('');
                 
@@ -1320,7 +1321,6 @@
             const returnCash = hasReturn ? (parseFloat(document.getElementById('stepReturnCash').value) || 0) : 0;
             const returnCashless = hasReturn ? (parseFloat(document.getElementById('stepReturnCashless').value) || 0) : 0;
             
-            // Получаем остатки из отображаемых значений
             const safeCashText = document.getElementById('safeCash').textContent;
             const safeCashlessText = document.getElementById('safeCashless').textContent;
             
@@ -1346,10 +1346,12 @@
             document.getElementById('summarySafeCash').textContent = formatMoney(finalCash);
             document.getElementById('summarySafeCashless').textContent = formatMoney(finalCashless);
             
+            const storeCategories = categories.filter(c => c.store === selectedStore);
+            
             let html = '';
             stepExpenses.forEach(e => {
                 if (e.amount) {
-                    const cat = categories.find(c => c.id === e.category);
+                    const cat = storeCategories.find(c => c.id === e.category);
                     html += `<div class="expense-summary-item">
                         <span>${cat ? cat.name : e.category} (${e.type === 'cash' ? 'НАҚД' : 'БЕЗНАЛ'})</span>
                         <span class="expense-summary-amount">${formatMoney(e.amount)}</span>
@@ -1359,7 +1361,7 @@
             document.getElementById('summaryExpensesList').innerHTML = html || '<div class="expense-summary-item">Харҷ нест</div>';
         }
 
-        async function saveDay() {
+        function saveDay() {
             const date = document.getElementById('stepDate').value;
             const store = selectedStore;
             const admin = document.getElementById('stepAdmin').value || 'Админ';
@@ -1397,6 +1399,7 @@
             const finalCashless = Math.max(0, safeCashless + cashless - expenseCashless - returnCashless);
             
             const report = {
+                id: `${store}_${date}`,
                 store, 
                 date, 
                 adminName: admin,
@@ -1415,15 +1418,14 @@
                 createdAt: new Date().toISOString()
             };
             
-            try {
-                await db.collection('reports').doc(`${store}_${date}`).set(report);
-                showToast('✅ Ҳисобот сабт шуд!');
-                resetStepData();
-                setTimeout(() => goToMainMenu(), 1500);
-            } catch (error) {
-                console.error(error);
-                showToast('❌ Хато', 'error');
-            }
+            // Удаляем старый отчёт за эту дату, если есть
+            reports = reports.filter(r => !(r.store === store && r.date === date));
+            reports.push(report);
+            saveReports();
+            
+            showToast('✅ Ҳисобот сабт шуд!');
+            resetStepData();
+            setTimeout(() => goToMainMenu(), 1500);
         }
 
         function resetStepData() {
@@ -1445,9 +1447,9 @@
             return amount.toLocaleString('ru-RU') + ' ₽'; 
         }
         
-        function getCategoryName(id) { 
-            const c = categories.find(c => c.id === id); 
-            return c ? c.name : id; 
+        function getCategoryName(categoryId) { 
+            const c = categories.find(c => c.id === categoryId); 
+            return c ? c.name : categoryId; 
         }
 
         // ============================================
@@ -1519,7 +1521,6 @@
             } else {
                 for (let i = 0; i < expensesList.length; i++) {
                     const text = expensesList[i].textContent;
-                    // Разбиваем длинный текст, если нужно
                     if (text.length > 40) {
                         const parts = text.match(/.{1,40}/g) || [];
                         parts.forEach(part => {
@@ -1575,7 +1576,6 @@
                 }
             } catch (e) {
                 console.error(e);
-                // Если ошибка при отправке, пробуем скачать
                 try {
                     const doc = generatePDF();
                     const shop = document.getElementById('summaryShop').textContent;
@@ -1651,43 +1651,21 @@
                 ).join('');
             }
             
-            // Собираем расходы по категориям
+            // Категории
             const catSums = {};
-            const categoryPromises = [];
             
             monthReports.forEach(r => {
                 if (r.expenses) {
                     r.expenses.forEach(e => {
                         if (e.category) {
-                            // Асинхронно получаем имя категории
-                            const promise = db.collection('categories').doc(e.category).get()
-                                .then(doc => {
-                                    if (doc.exists) {
-                                        const catName = doc.data().name;
-                                        catSums[catName] = (catSums[catName] || 0) + (e.amount || 0);
-                                    } else {
-                                        catSums[e.category] = (catSums[e.category] || 0) + (e.amount || 0);
-                                    }
-                                })
-                                .catch(() => {
-                                    catSums[e.category] = (catSums[e.category] || 0) + (e.amount || 0);
-                                });
-                            categoryPromises.push(promise);
+                            const catName = getCategoryName(e.category);
+                            catSums[catName] = (catSums[catName] || 0) + (e.amount || 0);
                         }
                     });
                 }
             });
             
-            // После получения всех категорий обновляем графики
-            Promise.all(categoryPromises).then(() => {
-                renderCharts(catSums);
-            }).catch(() => {
-                renderCharts(catSums);
-            });
-            
-            if (Object.keys(catSums).length === 0) {
-                renderCharts({});
-            }
+            renderCharts(catSums);
         }
         
         function renderCharts(catSums) {
@@ -1769,14 +1747,13 @@
             updateHistory(); 
         }
 
-        async function deleteReport(id) {
+        function deleteReport(id) {
             if (!confirm('Шумо мутмаин ҳастед?')) return;
-            try { 
-                await db.collection('reports').doc(id).delete(); 
-                showToast('✅ Ҳисобот нест шуд'); 
-            } catch (e) { 
-                showToast('❌ Хато', 'error'); 
-            }
+            reports = reports.filter(r => r.id !== id);
+            saveReports();
+            updateHistory();
+            updateMonthlyReport();
+            showToast('✅ Ҳисобот нест шуд');
         }
 
         // ============================================
@@ -1805,7 +1782,8 @@
         // ============================================
         // INIT
         // ============================================
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
             document.getElementById('stepDate').value = new Date().toISOString().split('T')[0];
             showScreen('storeScreen');
             document.getElementById('navBar').style.display = 'none';
