@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Hisoboti F-1 | F-5 | F-7</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
+        /* ========== СТИЛИ ========== */
         * {
             margin: 0;
             padding: 0;
@@ -41,21 +43,6 @@
             position: relative;
         }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(ellipse at 20% 80%, rgba(37, 99, 235, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 20%, rgba(251, 191, 36, 0.1) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 50%, rgba(37, 99, 235, 0.05) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
         .app-container {
             position: relative;
             z-index: 1;
@@ -67,7 +54,6 @@
             padding-bottom: 90px;
         }
 
-        /* Screen Management */
         .screen { display: none; }
         .screen.active { display: block; animation: slideUp 0.4s ease-out; }
 
@@ -96,7 +82,6 @@
         }
         .header p { color: var(--text-secondary); font-size: 14px; }
 
-        /* Progress Bar */
         .progress-bar {
             display: flex;
             justify-content: space-between;
@@ -130,7 +115,6 @@
         .progress-step.completed { background: var(--success); border-color: var(--success); color: white; }
         .progress-step.active { background: var(--gold); border-color: var(--gold); color: var(--primary-blue); }
 
-        /* Store Cards */
         .store-grid {
             display: grid;
             gap: 16px;
@@ -185,7 +169,6 @@
         .store-card .store-name { font-size: 28px; font-weight: 700; color: var(--text-primary); }
         .store-card.selected .store-name { color: var(--gold); }
 
-        /* Buttons */
         .btn {
             width: 100%;
             padding: 16px;
@@ -221,7 +204,6 @@
         }
         #continueBtn.visible { opacity: 1; visibility: visible; transform: translateY(0); }
 
-        /* Navigation */
         .nav-bar {
             position: fixed;
             bottom: 0;
@@ -251,7 +233,6 @@
         .nav-item svg { width: 24px; height: 24px; }
         .nav-item span { font-size: 11px; font-weight: 500; }
 
-        /* Daily Report Screens */
         .step-content {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
@@ -540,29 +521,6 @@
             font-weight: 600;
             cursor: pointer;
         }
-
-        .sync-btn {
-            position: fixed;
-            bottom: 100px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            border-radius: 28px;
-            background: var(--success);
-            border: none;
-            color: white;
-            font-size: 26px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-            z-index: 99;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .sync-btn:active { transform: scale(0.95); }
-        .sync-btn.syncing { animation: spin 1s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         .month-nav {
             display: flex;
@@ -864,7 +822,6 @@
             <div class="progress-bar"><div class="progress-step completed">1</div><div class="progress-step completed">2</div><div class="progress-step completed">3</div><div class="progress-step completed">4</div><div class="progress-step active">5</div></div>
             <div class="step-content">
                 <div class="step-title">📊 Натиҷаи рӯз</div>
-                <!-- ВСЁ в одной рамке summary-block, включая остатки прошлого дня -->
                 <div class="summary-block" id="stepSummaryBlock">
                     <div class="summary-header">
                         <span id="stepSummaryShop">F-1</span>
@@ -945,8 +902,8 @@
         <div class="nav-item" onclick="showScreen('historyScreen')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span>Таърих</span></div>
     </nav>
 
-    <!-- Sync Button -->
-    <button class="sync-btn" id="syncBtn" onclick="syncWithGitHub()">🔄</button>
+    <!-- Кнопка синхронизации больше не нужна, но оставим как заглушку -->
+    <button class="sync-btn" id="syncBtn" style="display:none;">🔄</button>
 
     <!-- Modal -->
     <div class="modal-overlay" id="imageModal" onclick="closeModal()"><div class="modal-content" onclick="event.stopPropagation()"><button class="modal-close" onclick="closeModal()">×</button><img class="modal-image" id="modalImage" src="" alt="Receipt"></div></div>
@@ -955,15 +912,25 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // ⚠️ ВАЖНО: замените owner на свой логин, токен оставьте как текст
-        const GITHUB_CONFIG = {
-            owner: 'alijan572',
-            repo: 'hisobot',
-            path: 'data.json',
-            token: 'ВАШ_ТОКЕН'
+        // ============================================
+        // 🔥 FIREBASE КОНФИГУРАЦИЯ - ВСТАВЬ СВОЮ!
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDqDs4QxH0jhtFvFqtR20b5lbRKGAyQV6U",
+  authDomain: "hisobot-app-914ce.firebaseapp.com",
+  projectId: "hisobot-app-914ce",
+  storageBucket: "hisobot-app-914ce.firebasestorage.app",
+  messagingSenderId: "306527113905",
+  appId: "1:306527113905:web:58c93a7a850a8403d04890"
         };
 
-        // State
+        // Инициализация Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // ============================================
+        // STATE (состояние приложения)
+        // ============================================
         let selectedStore = null;
         let currentDate = new Date();
         let stepExpenses = [];
@@ -977,43 +944,131 @@
             { id: 'other', name: 'Дигар' }
         ];
         let selectedCategory = null;
-        let syncInProgress = false;
         let hasReturn = false;
 
-        function loadData() {
-            try {
-                const storedReports = localStorage.getItem('salesReports');
-                if (storedReports) reports = JSON.parse(storedReports);
-                const storedCategories = localStorage.getItem('expenseCategories');
-                if (storedCategories) categories = JSON.parse(storedCategories);
-            } catch (e) { reports = []; }
-        }
-        function saveData() {
-            localStorage.setItem('salesReports', JSON.stringify(reports));
-            localStorage.setItem('expenseCategories', JSON.stringify(categories));
+        // ============================================
+        // ПОДПИСКА НА ИЗМЕНЕНИЯ В FIREBASE (РЕАЛЬНОЕ ВРЕМЯ!)
+        // ============================================
+        function subscribeToReports() {
+            db.collection('reports').onSnapshot(snapshot => {
+                reports = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                // Обновляем интерфейс
+                if (document.getElementById('monthlyReportScreen').classList.contains('active')) {
+                    updateMonthlyReport();
+                }
+                if (document.getElementById('historyScreen').classList.contains('active')) {
+                    updateHistory();
+                }
+                if (document.getElementById('dailyStep5').classList.contains('active')) {
+                    // Если мы на шаге 5, обновляем остатки
+                    loadStepPreviousBalances();
+                }
+            });
         }
 
+        // ============================================
+        // ЗАГРУЗКА ДАННЫХ ИЗ FIREBASE
+        // ============================================
+        async function loadReportsFromFirebase() {
+            const snapshot = await db.collection('reports').get();
+            reports = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+        }
+
+        // ============================================
+        // СОХРАНЕНИЕ В FIREBASE
+        // ============================================
+        async function saveReportToFirebase(report) {
+            try {
+                // Используем дату+магазин как ID, чтобы не было дубликатов
+                const reportId = `${report.store}_${report.date}`;
+                await db.collection('reports').doc(reportId).set(report);
+                showToast('✅ Ҳисобот сабт шуд!');
+                return true;
+            } catch (error) {
+                console.error('Firebase error:', error);
+                showToast('❌ Хато ҳангоми сабт', 'error');
+                return false;
+            }
+        }
+
+        // ============================================
+        // УДАЛЕНИЕ ИЗ FIREBASE
+        // ============================================
+        async function deleteReportFromFirebase(id) {
+            try {
+                await db.collection('reports').doc(id).delete();
+                showToast('✅ Ҳисобот нест шуд');
+                return true;
+            } catch (error) {
+                console.error('Delete error:', error);
+                showToast('❌ Хато ҳангоми нест кардан', 'error');
+                return false;
+            }
+        }
+
+        // ============================================
+        // ПОЛУЧЕНИЕ ОСТАТКОВ ПРОШЛОГО ДНЯ
+        // ============================================
+        async function getPreviousDayBalances(store, date) {
+            const prevDate = new Date(date);
+            prevDate.setDate(prevDate.getDate() - 1);
+            const prevDateStr = prevDate.toISOString().split('T')[0];
+            const prevId = `${store}_${prevDateStr}`;
+            
+            const doc = await db.collection('reports').doc(prevId).get();
+            
+            if (doc.exists) {
+                const data = doc.data();
+                return {
+                    cash: data.safeCash || 0,
+                    cashless: data.safeCashless || 0
+                };
+            }
+            
+            // Начальные данные
+            if (store === 'F-1') return { cash: 8384, cashless: 434925 };
+            if (store === 'F-5') return { cash: 51771, cashless: 489288 };
+            if (store === 'F-7') return { cash: 138070, cashless: 224314 };
+            return { cash: 0, cashless: 0 };
+        }
+
+        // ============================================
+        // НАВИГАЦИЯ
+        // ============================================
         function goToMainMenu() {
             selectedStore = null;
             showScreen('storeScreen');
             document.getElementById('navBar').style.display = 'none';
             document.querySelectorAll('.store-card').forEach(c => c.classList.remove('selected'));
             document.getElementById('continueBtn').classList.remove('visible');
-            showToast('Ба менюи асосӣ гузаштед');
         }
+
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
-            if (screenId === 'monthlyReportScreen') updateMonthlyReport();
-            else if (screenId === 'historyScreen') updateHistory();
+            
+            if (screenId === 'monthlyReportScreen') {
+                updateMonthlyReport();
+            } else if (screenId === 'historyScreen') {
+                updateHistory();
+            }
         }
+
         function selectStore(store) {
             selectedStore = store;
             document.querySelectorAll('.store-card').forEach(c => c.classList.remove('selected'));
             document.querySelector(`[data-store="${store}"]`).classList.add('selected');
             document.getElementById('continueBtn').classList.add('visible');
         }
-        function goToDailyReport() {
+
+        async function goToDailyReport() {
             if (!selectedStore) return;
             resetStepData();
             document.getElementById('stepStore').textContent = selectedStore;
@@ -1021,11 +1076,19 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('stepDate').value = today;
             updateStepDate();
-            loadStepPreviousBalances();
+            
+            // Загружаем остатки прошлого дня из Firebase
+            const balances = await getPreviousDayBalances(selectedStore, today);
+            document.getElementById('stepSafeCash').textContent = formatMoney(balances.cash);
+            document.getElementById('stepSafeCashless').textContent = formatMoney(balances.cashless);
+            
             showScreen('dailyStep1');
             document.getElementById('navBar').style.display = 'flex';
         }
 
+        // ============================================
+        // ФУНКЦИИ ШАГОВ (как в предыдущем коде)
+        // ============================================
         function resetStepData() {
             stepExpenses = []; stepReceiptImage = null; hasReturn = false;
             document.getElementById('stepTotal').value = '';
@@ -1094,7 +1157,6 @@
             const name = inp.value.trim();
             if (!name) { showToast('Номи категорияро ворид кунед'); return; }
             categories.push({ id: 'cat_' + Date.now(), name });
-            saveData();
             renderStepCategories();
             inp.value = '';
             toggleStepCategoryForm();
@@ -1104,7 +1166,6 @@
             if (stepExpenses.some(e => e.category === id)) { showToast('Ин категория дар харҷҳо истифода шудааст'); return; }
             if (['products','salary','rent','utilities','other'].includes(id)) { showToast('Категорияи асосиро нест карда наметавонед'); return; }
             categories = categories.filter(c => c.id !== id);
-            saveData();
             if (selectedCategory === id) selectedCategory = null;
             renderStepCategories();
             showToast('Категория нест шуд');
@@ -1140,20 +1201,13 @@
             }).join('');
         }
 
-        function loadStepPreviousBalances() {
+        async function loadStepPreviousBalances() {
             const date = document.getElementById('stepDate').value;
             const store = selectedStore;
             if (!date || !store) return;
-            const prevDate = new Date(date); prevDate.setDate(prevDate.getDate()-1);
-            const prevStr = prevDate.toISOString().split('T')[0];
-            const prev = reports.find(r => r.date === prevStr && r.store === store);
-            let cash = 0, cashless = 0;
-            if (prev) { cash = prev.safeCash || 0; cashless = prev.safeCashless || 0; }
-            else if (store === 'F-1') { cash = 8384; cashless = 434925; }
-            else if (store === 'F-5') { cash = 51771; cashless = 489288; }
-            else if (store === 'F-7') { cash = 138070; cashless = 224314; }
-            document.getElementById('stepSafeCash').textContent = formatMoney(cash);
-            document.getElementById('stepSafeCashless').textContent = formatMoney(cashless);
+            const balances = await getPreviousDayBalances(store, date);
+            document.getElementById('stepSafeCash').textContent = formatMoney(balances.cash);
+            document.getElementById('stepSafeCashless').textContent = formatMoney(balances.cashless);
         }
 
         function calculateStepTotals() {
@@ -1185,7 +1239,7 @@
             document.getElementById('stepSummaryExpensesList').innerHTML = html || '<div class="expense-summary-item">Харҷ нест</div>';
         }
 
-        function saveStepDay() {
+        async function saveStepDay() {
             const date = document.getElementById('stepDate').value;
             const store = selectedStore;
             const admin = document.getElementById('stepAdmin').value || 'Админ';
@@ -1202,27 +1256,29 @@
             stepExpenses.forEach(e => { if (e.amount) { if (e.type==='cash') expenseCash+=e.amount; else expenseCashless+=e.amount; } });
             const finalCash = Math.max(0, safeCash + cash - expenseCash - returnCash);
             const finalCashless = Math.max(0, safeCashless + cashless - expenseCashless - returnCashless);
+            
             const report = {
-                id: Date.now(), date, store, adminName: admin,
+                store, date, adminName: admin,
                 totalCheck: total, cashless, cash, returnCash, returnCashless,
                 expenses: stepExpenses.filter(e => e.amount > 0),
                 receiptImage: stepReceiptImage,
                 totalSales: total, totalReturns: returnCash+returnCashless,
                 totalExpenses: expenseCash+expenseCashless,
-                safeCash: finalCash, safeCashless: finalCashless
+                safeCash: finalCash, safeCashless: finalCashless,
+                createdAt: new Date().toISOString()
             };
-            reports = reports.filter(r => !(r.date === date && r.store === store));
-            reports.push(report);
-            saveData();
-            showToast('Ҳисобот сабт шуд!');
-            syncWithGitHub();
-            setTimeout(() => goToMainMenu(), 1500);
+            
+            const success = await saveReportToFirebase(report);
+            if (success) {
+                resetStepData();
+                setTimeout(() => goToMainMenu(), 1500);
+            }
         }
 
         function formatMoney(amount) { return amount.toLocaleString('ru-RU') + ' ₽'; }
         function getCategoryName(id) { const c = categories.find(c => c.id === id); return c ? c.name : id; }
 
-        // PDF generation – включает остатки прошлого дня в одной рамке
+        // PDF generation
         function generatePDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -1234,7 +1290,7 @@
             doc.text(`Магазин: ${shop}`,20,40); doc.text(`Сана: ${date}`,20,50); doc.text(`Администратор: ${admin}`,20,60);
             doc.setDrawColor(251,191,36); doc.line(20,65,190,65);
 
-            // Остатки прошлого дня (в рамке)
+            // Остатки прошлого дня
             doc.setFillColor(37,99,235,0.2); doc.roundedRect(20,75,170,25,3,3,'F');
             doc.setTextColor(255,255,255); doc.setFontSize(12);
             doc.text('📦 БОҚИЯИ ДИРӮЗА ДАР СЕЙФ', 25, 85);
@@ -1272,11 +1328,6 @@
             return doc;
         }
 
-        function downloadStepPDF() {
-            try { generatePDF().save(`hisobot_${document.getElementById('stepSummaryShop').textContent}_${document.getElementById('stepSummaryDate').textContent.replace(/\./g,'-')}.pdf`); showToast('✅ PDF зеркашӣ шуд'); }
-            catch(e) { showToast('❌ Хато ҳангоми зеркашӣ','error'); }
-        }
-
         async function shareStepPDF() {
             try {
                 showToast('⏳ Тайёр кардани PDF...','info');
@@ -1290,7 +1341,7 @@
                     showToast('✅ PDF фиристода шуд!');
                 } else {
                     doc.save(file.name);
-                    showToast('✅ PDF зеркашӣ шуд (фиристодан дастгирӣ намешавад)');
+                    showToast('✅ PDF зеркашӣ шуд');
                 }
             } catch(e) {
                 console.error(e);
@@ -1313,81 +1364,6 @@
             else if (step === 4) showScreen('dailyStep4');
         }
 
-        // Синхронизация с GitHub
-        async function syncWithGitHub() {
-            if (syncInProgress) { showToast('Синхронизация уже идёт...','info'); return; }
-            const btn = document.getElementById('syncBtn'); btn.classList.add('syncing'); syncInProgress = true;
-            let userToken = localStorage.getItem('github_token');
-            if (!userToken) {
-                userToken = prompt('Введите GitHub токен для синхронизации:');
-                if (!userToken) { btn.classList.remove('syncing'); syncInProgress = false; return; }
-                localStorage.setItem('github_token', userToken);
-            }
-            showToast('🔄 Синхронизация...','info');
-            try {
-                const test = await fetch('https://api.github.com/user', { headers: { 'Authorization': `token ${userToken}`, 'Accept': 'application/vnd.github.v3+json' } });
-                if (!test.ok) throw new Error('Токен не работает');
-                const resp = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, { headers: { 'Authorization': `token ${userToken}`, 'Accept': 'application/vnd.github.v3+json' } });
-                let githubReports = [], githubCategories = [], sha = null;
-                if (resp.ok) {
-                    const data = await resp.json(); sha = data.sha;
-                    try { const c = JSON.parse(atob(data.content)); githubReports = c.reports || []; githubCategories = c.categories || []; }
-                    catch(e) { console.log('Ошибка парсинга JSON'); }
-                }
-                const repMap = new Map();
-                githubReports.forEach(r => repMap.set(r.id, r));
-                reports.forEach(r => repMap.set(r.id, r));
-                const mergedReports = Array.from(repMap.values());
-                const catMap = new Map();
-                githubCategories.forEach(c => catMap.set(c.id, c));
-                categories.forEach(c => catMap.set(c.id, c));
-                const mergedCats = Array.from(catMap.values());
-                reports = mergedReports; categories = mergedCats; saveData();
-                const dataToUpload = { reports: mergedReports, categories: mergedCats, lastUpdate: new Date().toISOString() };
-                const jsonStr = JSON.stringify(dataToUpload, null, 2);
-                const enc = new TextEncoder(); const uint8 = enc.encode(jsonStr);
-                let binary = ''; uint8.forEach(b => binary += String.fromCharCode(b));
-                const b64 = btoa(binary);
-                const upResp = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
-                    method: 'PUT', headers: { 'Authorization': `token ${userToken}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
-                    body: JSON.stringify({ message: `Sync data - ${new Date().toLocaleString()}`, content: b64, sha })
-                });
-                if (upResp.ok) { showToast('✅ Синхронизация успешна!'); updateHistory(); updateMonthlyReport(); }
-                else throw new Error('Ошибка загрузки');
-            } catch(e) { showToast('❌ '+e.message,'error'); localStorage.removeItem('github_token'); }
-            finally { btn.classList.remove('syncing'); syncInProgress = false; }
-        }
-
-        // Удаление отчёта
-        async function deleteReport(id) {
-            if (!confirm('Шумо мутмаин ҳастед?')) return;
-            showToast('🔄 Удаление...','info');
-            let userToken = localStorage.getItem('github_token');
-            if (!userToken) {
-                userToken = prompt('Введите GitHub токен для синхронизации:');
-                if (!userToken) return;
-                localStorage.setItem('github_token', userToken);
-            }
-            try {
-                const resp = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, { headers: { 'Authorization': `token ${userToken}`, 'Accept': 'application/vnd.github.v3+json' } });
-                if (!resp.ok) throw new Error('Не удалось получить данные с GitHub');
-                const data = await resp.json(); const content = JSON.parse(atob(data.content));
-                const updated = content.reports.filter(r => r.id !== id);
-                reports = updated; saveData();
-                const toUpload = { reports: updated, categories: content.categories || categories, lastUpdate: new Date().toISOString() };
-                const jsonStr = JSON.stringify(toUpload,null,2);
-                const enc = new TextEncoder(); const uint8 = enc.encode(jsonStr);
-                let binary = ''; uint8.forEach(b => binary += String.fromCharCode(b));
-                const b64 = btoa(binary);
-                const up = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`, {
-                    method: 'PUT', headers: { 'Authorization': `token ${userToken}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: `Удалён отчёт ${id}`, content: b64, sha: data.sha })
-                });
-                if (up.ok) { showToast('✅ Отчёт удалён навсегда!'); updateHistory(); updateMonthlyReport(); }
-                else throw new Error('Ошибка загрузки на GitHub');
-            } catch(e) { showToast('❌ '+e.message,'error'); }
-        }
-
         // Месячный отчёт
         function changeMonth(delta) { currentDate.setMonth(currentDate.getMonth()+delta); updateMonthlyReport(); }
         function updateMonthlyReport() {
@@ -1401,7 +1377,8 @@
             document.getElementById('monthCashless').textContent = formatMoney(monthReports.reduce((s,r)=>s+(r.cashless||0),0));
             const tb = document.getElementById('monthlyTable');
             if (!monthReports.length) tb.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;">Ҳисобот нест</td></tr>';
-            else tb.innerHTML = monthReports.map(r => `<tr class="clickable" onclick="openReport(${r.id})"><td>${formatDate(r.date)}</td><td>${r.store}</td><td>${formatMoney(r.totalSales)}</td><td>${formatMoney(r.totalExpenses)}</td></tr>`).join('');
+            else tb.innerHTML = monthReports.map(r => `<tr class="clickable" onclick="openReport('${r.id}')"><td>${formatDate(r.date)}</td><td>${r.store}</td><td>${formatMoney(r.totalSales)}</td><td>${formatMoney(r.totalExpenses)}</td></tr>`).join('');
+            
             const cats = {};
             monthReports.forEach(r => { if (r.expenses) r.expenses.forEach(e => { if (e.category) { let n = getCategoryName(e.category); cats[n] = (cats[n]||0)+(e.amount||0); } }); });
             const chart = document.getElementById('expenseChart');
@@ -1419,7 +1396,7 @@
         function openReport(id) { showToast('Просмотр отчёта в разработке'); }
 
         // История
-        function updateHistory() {
+        async function updateHistory() {
             let filtered = [...reports];
             const fd = document.getElementById('filterDate').value;
             const fs = document.getElementById('filterStore').value;
@@ -1430,10 +1407,16 @@
             if (!filtered.length) { cont.innerHTML = '<div class="empty-state"><div class="icon">📋</div><h3>Ҳисобот нест</h3></div>'; return; }
             cont.innerHTML = filtered.map(r => {
                 let d = new Date(r.date), ds = d.getDate().toString().padStart(2,'0')+'.'+(d.getMonth()+1).toString().padStart(2,'0')+'.'+d.getFullYear();
-                return `<div class="history-item"><div class="header-row"><div class="date">${ds}</div><div class="store-badge">${r.store}</div></div><div class="amounts"><div><span class="label">Фурӯш:</span> ${formatMoney(r.totalSales)}</div><div><span class="label">Харҷ:</span> ${formatMoney(r.totalExpenses)}</div></div>${r.receiptImage ? `<img class="thumbnail" src="${r.receiptImage}" onclick="showImageModal('${r.receiptImage}')">` : ''}<div class="action-buttons"><button class="btn btn-danger" onclick="deleteReport(${r.id})">Нест кардан</button></div></div>`;
+                return `<div class="history-item"><div class="header-row"><div class="date">${ds}</div><div class="store-badge">${r.store}</div></div><div class="amounts"><div><span class="label">Фурӯш:</span> ${formatMoney(r.totalSales)}</div><div><span class="label">Харҷ:</span> ${formatMoney(r.totalExpenses)}</div></div>${r.receiptImage ? `<img class="thumbnail" src="${r.receiptImage}" onclick="showImageModal('${r.receiptImage}')">` : ''}<div class="action-buttons"><button class="btn btn-danger" onclick="deleteReport('${r.id}')">Нест кардан</button></div></div>`;
             }).join('');
         }
         function filterHistory() { updateHistory(); }
+
+        // Удаление через Firebase
+        async function deleteReport(id) {
+            if (!confirm('Шумо мутмаин ҳастед?')) return;
+            await deleteReportFromFirebase(id);
+        }
 
         // Modal
         function showImageModal(src) { document.getElementById('modalImage').src = src; document.getElementById('imageModal').classList.add('active'); }
@@ -1446,8 +1429,12 @@
         }
 
         // Init
-        document.addEventListener('DOMContentLoaded', ()=>{
-            loadData();
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Загружаем данные из Firebase
+            await loadReportsFromFirebase();
+            // Подписываемся на изменения
+            subscribeToReports();
+            
             document.getElementById('stepDate').value = new Date().toISOString().split('T')[0];
             showScreen('storeScreen');
             document.getElementById('navBar').style.display = 'none';
