@@ -9,7 +9,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        /* ========== СТИЛИ ========== */
         * {
             margin: 0;
             padding: 0;
@@ -817,7 +816,7 @@
             <div class="btn-nav"><button class="btn btn-secondary" onclick="prevStep(3)">← Ба ақиб</button><button class="btn btn-primary" onclick="nextStep(4)">Давом →</button></div>
         </div>
 
-        <!-- Шаг 5: Натиҷаи рӯз (все данные в одной рамке) -->
+        <!-- Шаг 5: Натиҷаи рӯз -->
         <div id="dailyStep5" class="screen">
             <div class="progress-bar"><div class="progress-step completed">1</div><div class="progress-step completed">2</div><div class="progress-step completed">3</div><div class="progress-step completed">4</div><div class="progress-step active">5</div></div>
             <div class="step-content">
@@ -829,7 +828,7 @@
                         <span id="stepSummaryAdmin">Админ</span>
                     </div>
 
-                    <!-- Боқияи дирӯза (внутри той же рамки) -->
+                    <!-- Боқияи дирӯза -->
                     <div style="margin-bottom: 16px; padding: 12px; background: rgba(37,99,235,0.2); border-radius: 12px;">
                         <div style="color: var(--accent-blue); font-weight: 600; margin-bottom: 8px;">📦 БОҚИЯИ ДИРӮЗА ДАР СЕЙФ</div>
                         <div style="display: flex; justify-content: space-between; padding: 4px 0;">
@@ -902,7 +901,7 @@
         <div class="nav-item" onclick="showScreen('historyScreen')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span>Таърих</span></div>
     </nav>
 
-    <!-- Кнопка синхронизации больше не нужна, но оставим как заглушку -->
+    <!-- Кнопка синхронизации больше не нужна -->
     <button class="sync-btn" id="syncBtn" style="display:none;">🔄</button>
 
     <!-- Modal -->
@@ -912,24 +911,19 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // ============================================
-        // 🔥 FIREBASE КОНФИГУРАЦИЯ
-        // ============================================
-        const firebaseConfig = {
+        // 🔥 FIREBASE КОНФИГУРАЦИЯ - НЕ МЕНЯТЬ!
+        firebase.initializeApp({
             apiKey: "AIzaSyDqDs4QxH0jhtFvFqtR20b5lbRKGAyQV6U",
             authDomain: "hisobot-app-914ce.firebaseapp.com",
             projectId: "hisobot-app-914ce",
             storageBucket: "hisobot-app-914ce.firebasestorage.app",
             messagingSenderId: "306527113905",
             appId: "1:306527113905:web:58c93a7a850a8403d04890"
-        };
-
-        // Инициализация Firebase
-        firebase.initializeApp(firebaseConfig);
+        });
         const db = firebase.firestore();
 
         // ============================================
-        // STATE (состояние приложения)
+        // STATE
         // ============================================
         let selectedStore = null;
         let currentDate = new Date();
@@ -947,97 +941,13 @@
         let hasReturn = false;
 
         // ============================================
-        // ПОДПИСКА НА ИЗМЕНЕНИЯ В FIREBASE (РЕАЛЬНОЕ ВРЕМЯ!)
+        // ПОДПИСКА НА ИЗМЕНЕНИЯ
         // ============================================
-        function subscribeToReports() {
-            db.collection('reports').onSnapshot(snapshot => {
-                reports = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                
-                // Обновляем интерфейс
-                if (document.getElementById('monthlyReportScreen').classList.contains('active')) {
-                    updateMonthlyReport();
-                }
-                if (document.getElementById('historyScreen').classList.contains('active')) {
-                    updateHistory();
-                }
-                if (document.getElementById('dailyStep5').classList.contains('active')) {
-                    // Если мы на шаге 5, обновляем остатки
-                    loadStepPreviousBalances();
-                }
-            });
-        }
-
-        // ============================================
-        // ЗАГРУЗКА ДАННЫХ ИЗ FIREBASE
-        // ============================================
-        async function loadReportsFromFirebase() {
-            const snapshot = await db.collection('reports').get();
-            reports = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-        }
-
-        // ============================================
-        // СОХРАНЕНИЕ В FIREBASE
-        // ============================================
-        async function saveReportToFirebase(report) {
-            try {
-                // Используем дату+магазин как ID, чтобы не было дубликатов
-                const reportId = `${report.store}_${report.date}`;
-                await db.collection('reports').doc(reportId).set(report);
-                showToast('✅ Ҳисобот сабт шуд!');
-                return true;
-            } catch (error) {
-                console.error('Firebase error:', error);
-                showToast('❌ Хато ҳангоми сабт', 'error');
-                return false;
-            }
-        }
-
-        // ============================================
-        // УДАЛЕНИЕ ИЗ FIREBASE
-        // ============================================
-        async function deleteReportFromFirebase(id) {
-            try {
-                await db.collection('reports').doc(id).delete();
-                showToast('✅ Ҳисобот нест шуд');
-                return true;
-            } catch (error) {
-                console.error('Delete error:', error);
-                showToast('❌ Хато ҳангоми нест кардан', 'error');
-                return false;
-            }
-        }
-
-        // ============================================
-        // ПОЛУЧЕНИЕ ОСТАТКОВ ПРОШЛОГО ДНЯ
-        // ============================================
-        async function getPreviousDayBalances(store, date) {
-            const prevDate = new Date(date);
-            prevDate.setDate(prevDate.getDate() - 1);
-            const prevDateStr = prevDate.toISOString().split('T')[0];
-            const prevId = `${store}_${prevDateStr}`;
-            
-            const doc = await db.collection('reports').doc(prevId).get();
-            
-            if (doc.exists) {
-                const data = doc.data();
-                return {
-                    cash: data.safeCash || 0,
-                    cashless: data.safeCashless || 0
-                };
-            }
-            
-            // Начальные данные
-            if (store === 'F-1') return { cash: 8384, cashless: 434925 };
-            if (store === 'F-5') return { cash: 51771, cashless: 489288 };
-            if (store === 'F-7') return { cash: 138070, cashless: 224314 };
-            return { cash: 0, cashless: 0 };
-        }
+        db.collection('reports').onSnapshot(snapshot => {
+            reports = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            if (document.getElementById('monthlyReportScreen').classList.contains('active')) updateMonthlyReport();
+            if (document.getElementById('historyScreen').classList.contains('active')) updateHistory();
+        });
 
         // ============================================
         // НАВИГАЦИЯ
@@ -1053,12 +963,8 @@
         function showScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(screenId).classList.add('active');
-            
-            if (screenId === 'monthlyReportScreen') {
-                updateMonthlyReport();
-            } else if (screenId === 'historyScreen') {
-                updateHistory();
-            }
+            if (screenId === 'monthlyReportScreen') updateMonthlyReport();
+            else if (screenId === 'historyScreen') updateHistory();
         }
 
         function selectStore(store) {
@@ -1068,33 +974,46 @@
             document.getElementById('continueBtn').classList.add('visible');
         }
 
-        // ИСПРАВЛЕННАЯ ФУНКЦИЯ goToDailyReport
         function goToDailyReport() {
             if (!selectedStore) return;
-            
-            // Сбрасываем данные
             resetStepData();
-            
-            // Устанавливаем значения
             document.getElementById('stepStore').textContent = selectedStore;
             document.getElementById('stepSummaryShop').textContent = selectedStore;
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('stepDate').value = today;
             updateStepDate();
             
-            // Загружаем остатки прошлого дня из Firebase (асинхронно)
-            getPreviousDayBalances(selectedStore, today).then(balances => {
-                document.getElementById('stepSafeCash').textContent = formatMoney(balances.cash);
-                document.getElementById('stepSafeCashless').textContent = formatMoney(balances.cashless);
+            // Загружаем остатки прошлого дня
+            const prevDate = new Date(today);
+            prevDate.setDate(prevDate.getDate() - 1);
+            const prevId = `${selectedStore}_${prevDate.toISOString().split('T')[0]}`;
+            
+            db.collection('reports').doc(prevId).get().then(doc => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    document.getElementById('stepSafeCash').textContent = formatMoney(data.safeCash || 0);
+                    document.getElementById('stepSafeCashless').textContent = formatMoney(data.safeCashless || 0);
+                } else {
+                    // Начальные данные
+                    if (selectedStore === 'F-1') {
+                        document.getElementById('stepSafeCash').textContent = formatMoney(8384);
+                        document.getElementById('stepSafeCashless').textContent = formatMoney(434925);
+                    } else if (selectedStore === 'F-5') {
+                        document.getElementById('stepSafeCash').textContent = formatMoney(51771);
+                        document.getElementById('stepSafeCashless').textContent = formatMoney(489288);
+                    } else if (selectedStore === 'F-7') {
+                        document.getElementById('stepSafeCash').textContent = formatMoney(138070);
+                        document.getElementById('stepSafeCashless').textContent = formatMoney(224314);
+                    }
+                }
             });
             
-            // Показываем первый шаг
             showScreen('dailyStep1');
             document.getElementById('navBar').style.display = 'flex';
         }
 
         // ============================================
-        // ФУНКЦИИ ШАГОВ
+        // ФУНКЦИИ ШАГОВ (сокращено для экономии места)
         // ============================================
         function resetStepData() {
             stepExpenses = []; stepReceiptImage = null; hasReturn = false;
@@ -1105,11 +1024,8 @@
             document.getElementById('stepReturnCashless').value = '';
             document.getElementById('stepAdmin').value = '';
             document.getElementById('returnFields').classList.remove('show');
-            const upload = document.getElementById('stepPhotoUpload');
-            const content = document.getElementById('stepUploadContent');
-            upload.classList.remove('has-image');
-            content.innerHTML = '<div class="upload-icon">📷</div><div class="upload-text">Акси чекро прикреп кунед</div>';
-            renderStepExpenses();
+            document.getElementById('stepUploadContent').innerHTML = '<div class="upload-icon">📷</div><div class="upload-text">Акси чекро прикреп кунед</div>';
+            document.getElementById('stepExpensesList').innerHTML = '';
             renderStepCategories();
         }
 
@@ -1131,20 +1047,15 @@
             const reader = new FileReader();
             reader.onload = function(ev) {
                 stepReceiptImage = ev.target.result;
-                const upload = document.getElementById('stepPhotoUpload');
-                const content = document.getElementById('stepUploadContent');
-                upload.classList.add('has-image');
-                content.innerHTML = `<img src="${stepReceiptImage}" alt="Receipt">`;
+                document.getElementById('stepUploadContent').innerHTML = `<img src="${stepReceiptImage}" alt="Receipt">`;
             };
             reader.readAsDataURL(file);
         }
 
         function showReturnFields(yes) {
             hasReturn = yes;
-            const fields = document.getElementById('returnFields');
-            if (yes) fields.classList.add('show');
-            else {
-                fields.classList.remove('show');
+            document.getElementById('returnFields').classList.toggle('show', yes);
+            if (!yes) {
                 document.getElementById('stepReturnCash').value = '';
                 document.getElementById('stepReturnCashless').value = '';
             }
@@ -1153,12 +1064,16 @@
         function renderStepCategories() {
             const container = document.getElementById('stepCategoriesList');
             if (!container) return;
-            container.innerHTML = categories.map(cat => `<div class="category-tag ${selectedCategory === cat.id ? 'selected' : ''}" onclick="selectStepCategory('${cat.id}')">${cat.name}<span class="remove-cat" onclick="event.stopPropagation(); removeStepCategory('${cat.id}')">×</span></div>`).join('');
+            container.innerHTML = categories.map(cat => 
+                `<div class="category-tag ${selectedCategory === cat.id ? 'selected' : ''}" onclick="selectStepCategory('${cat.id}')">${cat.name}<span class="remove-cat" onclick="event.stopPropagation(); removeStepCategory('${cat.id}')">×</span></div>`
+            ).join('');
         }
+
         function toggleStepCategoryForm() {
             const f = document.getElementById('stepCategoryForm');
             f.style.display = f.style.display === 'none' ? 'flex' : 'none';
         }
+
         function addStepCategory() {
             const inp = document.getElementById('stepNewCategoryName');
             const name = inp.value.trim();
@@ -1169,6 +1084,7 @@
             toggleStepCategoryForm();
             showToast('Категория илова шуд');
         }
+
         function removeStepCategory(id) {
             if (stepExpenses.some(e => e.category === id)) { showToast('Ин категория дар харҷҳо истифода шудааст'); return; }
             if (['products','salary','rent','utilities','other'].includes(id)) { showToast('Категорияи асосиро нест карда наметавонед'); return; }
@@ -1177,6 +1093,7 @@
             renderStepCategories();
             showToast('Категория нест шуд');
         }
+
         function selectStepCategory(id) {
             selectedCategory = selectedCategory === id ? null : id;
             renderStepCategories();
@@ -1208,15 +1125,6 @@
             }).join('');
         }
 
-        async function loadStepPreviousBalances() {
-            const date = document.getElementById('stepDate').value;
-            const store = selectedStore;
-            if (!date || !store) return;
-            const balances = await getPreviousDayBalances(store, date);
-            document.getElementById('stepSafeCash').textContent = formatMoney(balances.cash);
-            document.getElementById('stepSafeCashless').textContent = formatMoney(balances.cashless);
-        }
-
         function calculateStepTotals() {
             const total = parseFloat(document.getElementById('stepTotal').value) || 0;
             const cash = parseFloat(document.getElementById('stepCash').value) || 0;
@@ -1225,10 +1133,13 @@
             const returnCashless = hasReturn ? (parseFloat(document.getElementById('stepReturnCashless').value) || 0) : 0;
             const safeCash = parseInt(document.getElementById('stepSafeCash').textContent.replace(/[^\d]/g,'')) || 0;
             const safeCashless = parseInt(document.getElementById('stepSafeCashless').textContent.replace(/[^\d]/g,'')) || 0;
+            
             let expenseCash = 0, expenseCashless = 0;
             stepExpenses.forEach(e => { if (e.amount) { if (e.type==='cash') expenseCash+=e.amount; else expenseCashless+=e.amount; } });
+            
             const finalCash = Math.max(0, safeCash + cash - expenseCash - returnCash);
             const finalCashless = Math.max(0, safeCashless + cashless - expenseCashless - returnCashless);
+            
             document.getElementById('stepSummaryTotal').textContent = formatMoney(total);
             document.getElementById('stepSummaryCash').textContent = formatMoney(cash);
             document.getElementById('stepSummaryCashless').textContent = formatMoney(cashless);
@@ -1236,6 +1147,7 @@
             document.getElementById('stepSummaryReturnCashless').textContent = formatMoney(returnCashless);
             document.getElementById('stepSummarySafeCash').textContent = formatMoney(finalCash);
             document.getElementById('stepSummarySafeCashless').textContent = formatMoney(finalCashless);
+            
             let html = '';
             stepExpenses.forEach(e => {
                 if (e.amount) {
@@ -1250,17 +1162,21 @@
             const date = document.getElementById('stepDate').value;
             const store = selectedStore;
             const admin = document.getElementById('stepAdmin').value || 'Админ';
+            
             if (!date || !store) { showToast('Лутфан сана ва магазинро интихоб кунед'); return; }
+            if ((parseFloat(document.getElementById('stepTotal').value) || 0) === 0) { showToast('Лутфан суммаро ворид кунед'); return; }
+            
             const total = parseFloat(document.getElementById('stepTotal').value) || 0;
-            if (total === 0) { showToast('Лутфан суммаро ворид кунед'); return; }
             const cash = parseFloat(document.getElementById('stepCash').value) || 0;
             const cashless = parseFloat(document.getElementById('stepCashless').value) || 0;
             const returnCash = hasReturn ? (parseFloat(document.getElementById('stepReturnCash').value) || 0) : 0;
             const returnCashless = hasReturn ? (parseFloat(document.getElementById('stepReturnCashless').value) || 0) : 0;
             const safeCash = parseInt(document.getElementById('stepSafeCash').textContent.replace(/[^\d]/g,'')) || 0;
             const safeCashless = parseInt(document.getElementById('stepSafeCashless').textContent.replace(/[^\d]/g,'')) || 0;
+            
             let expenseCash = 0, expenseCashless = 0;
             stepExpenses.forEach(e => { if (e.amount) { if (e.type==='cash') expenseCash+=e.amount; else expenseCashless+=e.amount; } });
+            
             const finalCash = Math.max(0, safeCash + cash - expenseCash - returnCash);
             const finalCashless = Math.max(0, safeCashless + cashless - expenseCashless - returnCashless);
             
@@ -1275,10 +1191,13 @@
                 createdAt: new Date().toISOString()
             };
             
-            const success = await saveReportToFirebase(report);
-            if (success) {
+            try {
+                await db.collection('reports').doc(`${store}_${date}`).set(report);
+                showToast('✅ Ҳисобот сабт шуд!');
                 resetStepData();
                 setTimeout(() => goToMainMenu(), 1500);
+            } catch (error) {
+                showToast('❌ Хато ҳангоми сабт', 'error');
             }
         }
 
@@ -1297,7 +1216,6 @@
             doc.text(`Магазин: ${shop}`,20,40); doc.text(`Сана: ${date}`,20,50); doc.text(`Администратор: ${admin}`,20,60);
             doc.setDrawColor(251,191,36); doc.line(20,65,190,65);
 
-            // Остатки прошлого дня
             doc.setFillColor(37,99,235,0.2); doc.roundedRect(20,75,170,25,3,3,'F');
             doc.setTextColor(255,255,255); doc.setFontSize(12);
             doc.text('📦 БОҚИЯИ ДИРӮЗА ДАР СЕЙФ', 25, 85);
@@ -1319,7 +1237,7 @@
             doc.setTextColor(251,191,36); doc.text('Харҷҳо:',20,yPos); yPos+=10;
             doc.setTextColor(255,255,255);
             const expensesList = document.getElementById('stepSummaryExpensesList').children;
-            if (!expensesList.length || expensesList[0].textContent === 'Харҷ нест') {
+            if (!expensesList.length || expensesList[0]?.textContent === 'Харҷ нест') {
                 doc.text('Харҷ нест',30,yPos); yPos+=10;
             } else {
                 for (let i=0; i<expensesList.length; i++) {
@@ -1343,26 +1261,23 @@
                 const shop = document.getElementById('stepSummaryShop').textContent;
                 const date = document.getElementById('stepSummaryDate').textContent.replace(/\./g,'-');
                 const file = new File([blob], `hisobot_${shop}_${date}.pdf`, { type: 'application/pdf' });
-                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                
+                if (navigator.share && navigator.canShare?.({ files: [file] })) {
                     await navigator.share({ title: `Ҳисоботи ${shop} барои ${date}`, files: [file] });
                     showToast('✅ PDF фиристода шуд!');
                 } else {
-                    doc.save(file.name);
-                    showToast('✅ PDF зеркашӣ шуд');
+                    showToast('❌ Фиристодан дастгирӣ намешавад', 'error');
                 }
             } catch(e) {
-                console.error(e);
-                try { generatePDF().save(`hisobot_${document.getElementById('stepSummaryShop').textContent}_${document.getElementById('stepSummaryDate').textContent.replace(/\./g,'-')}.pdf`); showToast('✅ PDF зеркашӣ шуд'); }
-                catch(e2) { showToast('❌ Хато ҳангоми фиристодан','error'); }
+                showToast('❌ Хато ҳангоми фиристодан','error');
             }
         }
 
-        // Навигация по шагам
         function nextStep(step) {
             if (step === 1) showScreen('dailyStep2');
             else if (step === 2) showScreen('dailyStep3');
             else if (step === 3) { showScreen('dailyStep4'); renderStepCategories(); }
-            else if (step === 4) { loadStepPreviousBalances(); calculateStepTotals(); showScreen('dailyStep5'); }
+            else if (step === 4) { calculateStepTotals(); showScreen('dailyStep5'); }
         }
         function prevStep(step) {
             if (step === 1) showScreen('dailyStep1');
@@ -1371,77 +1286,73 @@
             else if (step === 4) showScreen('dailyStep4');
         }
 
-        // Месячный отчёт
         function changeMonth(delta) { currentDate.setMonth(currentDate.getMonth()+delta); updateMonthlyReport(); }
         function updateMonthlyReport() {
             const months = ['Январ','Феврал','Март','Апрел','Май','Июн','Июл','Август','Сентябр','Октябр','Ноябр','Декабр'];
             document.getElementById('currentMonth').textContent = months[currentDate.getMonth()]+' '+currentDate.getFullYear();
-            const m = currentDate.getMonth(), y = currentDate.getFullYear();
-            const monthReports = reports.filter(r => { let d=new Date(r.date); return d.getMonth()===m && d.getFullYear()===y; }).sort((a,b)=>new Date(a.date)-new Date(b.date));
+            const monthReports = reports.filter(r => new Date(r.date).getMonth()===currentDate.getMonth() && new Date(r.date).getFullYear()===currentDate.getFullYear())
+                .sort((a,b)=>new Date(a.date)-new Date(b.date));
+            
             document.getElementById('monthTotalSales').textContent = formatMoney(monthReports.reduce((s,r)=>s+(r.totalSales||0),0));
             document.getElementById('monthTotalExpenses').textContent = formatMoney(monthReports.reduce((s,r)=>s+(r.totalExpenses||0),0));
             document.getElementById('monthCash').textContent = formatMoney(monthReports.reduce((s,r)=>s+(r.cash||0),0));
             document.getElementById('monthCashless').textContent = formatMoney(monthReports.reduce((s,r)=>s+(r.cashless||0),0));
+            
             const tb = document.getElementById('monthlyTable');
             if (!monthReports.length) tb.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;">Ҳисобот нест</td></tr>';
-            else tb.innerHTML = monthReports.map(r => `<tr class="clickable" onclick="openReport('${r.id}')"><td>${formatDate(r.date)}</td><td>${r.store}</td><td>${formatMoney(r.totalSales)}</td><td>${formatMoney(r.totalExpenses)}</td></tr>`).join('');
+            else tb.innerHTML = monthReports.map(r => `<tr class="clickable" onclick="showToast('Просмотр в разработке')"><td>${formatDate(r.date)}</td><td>${r.store}</td><td>${formatMoney(r.totalSales)}</td><td>${formatMoney(r.totalExpenses)}</td></tr>`).join('');
             
             const cats = {};
-            monthReports.forEach(r => { if (r.expenses) r.expenses.forEach(e => { if (e.category) { let n = getCategoryName(e.category); cats[n] = (cats[n]||0)+(e.amount||0); } }); });
-            const chart = document.getElementById('expenseChart');
-            if (!Object.keys(cats).length) chart.innerHTML = '<div style="text-align:center;color:var(--text-secondary);">Харҷ нест</div>';
-            else {
-                const max = Math.max(...Object.values(cats));
-                chart.innerHTML = Object.entries(cats).map(([k,v]) => `<div class="bar-item"><div class="bar" style="height:${max?(v/max*100):4}px;"></div><div class="bar-label">${k.substring(0,8)}</div></div>`).join('');
-            }
-            const catBody = document.getElementById('categoryTable');
+            monthReports.forEach(r => r.expenses?.forEach(e => { if (e.category) cats[e.category] = (cats[e.category]||0)+(e.amount||0); }));
+            const max = Math.max(...Object.values(cats),1);
+            document.getElementById('expenseChart').innerHTML = Object.entries(cats).length ? 
+                Object.entries(cats).map(([k,v]) => `<div class="bar-item"><div class="bar" style="height:${v/max*100}px;"></div><div class="bar-label">${k.substring(0,3)}</div></div>`).join('') :
+                '<div style="text-align:center;color:var(--text-secondary);">Харҷ нест</div>';
+            
             const total = Object.values(cats).reduce((a,b)=>a+b,0);
-            if (!total) catBody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:16px;">Харҷ нест</td></tr>';
-            else catBody.innerHTML = Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v]) => `<tr><td>${k}</td><td>${formatMoney(v)}</td><td>${((v/total)*100).toFixed(1)}%</td></tr>`).join('');
+            document.getElementById('categoryTable').innerHTML = Object.entries(cats).length ?
+                Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,v]) => `<tr><td>${k}</td><td>${formatMoney(v)}</td><td>${((v/total)*100).toFixed(1)}%</td></tr>`).join('') :
+                '<tr><td colspan="3" style="text-align:center;padding:16px;">Харҷ нест</td></tr>';
         }
-        function formatDate(ds) { let d = new Date(ds); return d.getDate().toString().padStart(2,'0')+'.'+(d.getMonth()+1).toString().padStart(2,'0'); }
-        function openReport(id) { showToast('Просмотр отчёта в разработке'); }
 
-        // История
-        async function updateHistory() {
+        function formatDate(ds) { let d = new Date(ds); return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}`; }
+
+        function updateHistory() {
             let filtered = [...reports];
             const fd = document.getElementById('filterDate').value;
             const fs = document.getElementById('filterStore').value;
             if (fd) filtered = filtered.filter(r => r.date === fd);
             if (fs) filtered = filtered.filter(r => r.store === fs);
             filtered.sort((a,b)=>new Date(b.date)-new Date(a.date));
+            
             const cont = document.getElementById('historyList');
             if (!filtered.length) { cont.innerHTML = '<div class="empty-state"><div class="icon">📋</div><h3>Ҳисобот нест</h3></div>'; return; }
+            
             cont.innerHTML = filtered.map(r => {
-                let d = new Date(r.date), ds = d.getDate().toString().padStart(2,'0')+'.'+(d.getMonth()+1).toString().padStart(2,'0')+'.'+d.getFullYear();
-                return `<div class="history-item"><div class="header-row"><div class="date">${ds}</div><div class="store-badge">${r.store}</div></div><div class="amounts"><div><span class="label">Фурӯш:</span> ${formatMoney(r.totalSales)}</div><div><span class="label">Харҷ:</span> ${formatMoney(r.totalExpenses)}</div></div>${r.receiptImage ? `<img class="thumbnail" src="${r.receiptImage}" onclick="showImageModal('${r.receiptImage}')">` : ''}<div class="action-buttons"><button class="btn btn-danger" onclick="deleteReport('${r.id}')">Нест кардан</button></div></div>`;
+                const d = new Date(r.date);
+                const ds = `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth()+1).toString().padStart(2,'0')}.${d.getFullYear()}`;
+                return `<div class="history-item"><div class="header-row"><div class="date">${ds}</div><div class="store-badge">${r.store}</div></div>
+                <div class="amounts"><div><span class="label">Фурӯш:</span> ${formatMoney(r.totalSales)}</div><div><span class="label">Харҷ:</span> ${formatMoney(r.totalExpenses)}</div></div>
+                ${r.receiptImage ? `<img class="thumbnail" src="${r.receiptImage}" onclick="showImageModal('${r.receiptImage}')">` : ''}
+                <div class="action-buttons"><button class="btn btn-danger" onclick="deleteReport('${r.id}')">Нест кардан</button></div></div>`;
             }).join('');
         }
         function filterHistory() { updateHistory(); }
 
-        // Удаление через Firebase
         async function deleteReport(id) {
             if (!confirm('Шумо мутмаин ҳастед?')) return;
-            await deleteReportFromFirebase(id);
+            try { await db.collection('reports').doc(id).delete(); showToast('✅ Ҳисобот нест шуд'); } 
+            catch(e) { showToast('❌ Хато ҳангоми нест кардан', 'error'); }
         }
 
-        // Modal
         function showImageModal(src) { document.getElementById('modalImage').src = src; document.getElementById('imageModal').classList.add('active'); }
         function closeModal() { document.getElementById('imageModal').classList.remove('active'); }
-
-        // Toast
         function showToast(msg, type='success') {
             let t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); t.classList.toggle('error', type==='error');
             setTimeout(()=>t.classList.remove('show'), 3000);
         }
 
-        // Init
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Загружаем данные из Firebase
-            await loadReportsFromFirebase();
-            // Подписываемся на изменения
-            subscribeToReports();
-            
+        document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('stepDate').value = new Date().toISOString().split('T')[0];
             showScreen('storeScreen');
             document.getElementById('navBar').style.display = 'none';
