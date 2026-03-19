@@ -1000,7 +1000,7 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        // 🔥 FIREBASE КОНФИГУРАЦИЯ - ВСТАВЬ СВОИ КЛЮЧИ!
+        // 🔥 FIREBASE КОНФИГУРАЦИЯ
         const firebaseConfig = {
             apiKey: "AIzaSyDqDs4QxH0jhtFvFqtR20b5lbRKGAyQV6U",
             authDomain: "hisobot-app-914ce.firebaseapp.com",
@@ -1025,6 +1025,15 @@
         let categories = [];
         let selectedCategory = null;
         let hasReturn = false;
+
+        // ============================================
+        // НАЧАЛЬНЫЕ ДАННЫЕ ПО СЕЙФАМ (ОБНОВЛЁННЫЕ)
+        // ============================================
+        const initialSafeData = {
+            'F-1': { cash: 60342, cashless: 479191 },
+            'F-5': { cash: 71879, cashless: 509486 },
+            'F-7': { cash: 154266, cashless: 255763 }
+        };
 
         // ============================================
         // ЗАГРУЗКА КАТЕГОРИЙ ДЛЯ ТЕКУЩЕГО МАГАЗИНА
@@ -1124,17 +1133,10 @@
                     document.getElementById('safeCash').textContent = formatMoney(data.safeCash || 0);
                     document.getElementById('safeCashless').textContent = formatMoney(data.safeCashless || 0);
                 } else {
-                    // Начальные данные для каждого магазина
-                    if (selectedStore === 'F-1') {
-                        document.getElementById('safeCash').textContent = formatMoney(8384);
-                        document.getElementById('safeCashless').textContent = formatMoney(434925);
-                    } else if (selectedStore === 'F-5') {
-                        document.getElementById('safeCash').textContent = formatMoney(51771);
-                        document.getElementById('safeCashless').textContent = formatMoney(489288);
-                    } else if (selectedStore === 'F-7') {
-                        document.getElementById('safeCash').textContent = formatMoney(138070);
-                        document.getElementById('safeCashless').textContent = formatMoney(224314);
-                    }
+                    // Используем обновлённые начальные данные
+                    const initialData = initialSafeData[selectedStore] || { cash: 0, cashless: 0 };
+                    document.getElementById('safeCash').textContent = formatMoney(initialData.cash);
+                    document.getElementById('safeCashless').textContent = formatMoney(initialData.cashless);
                 }
             });
             
@@ -1227,7 +1229,6 @@
                 showToast('✅ Категория илова шуд');
                 inp.value = '';
                 toggleCategoryForm();
-                // Категории обновятся через snapshot
             } catch (error) {
                 showToast('❌ Хато', 'error');
             }
@@ -1264,10 +1265,11 @@
         // РАСХОДЫ
         // ============================================
         function addExpense() {
+            const defaultCategory = categories.length > 0 ? categories[0].id : null;
             stepExpenses.push({ 
                 id: Date.now(), 
                 type: 'cash', 
-                category: selectedCategory || (categories.length > 0 ? categories[0].id : 'other'), 
+                category: selectedCategory || defaultCategory, 
                 amount: 0 
             });
             renderExpenses();
@@ -1317,8 +1319,13 @@
             const cashless = parseFloat(document.getElementById('stepCashless').value) || 0;
             const returnCash = hasReturn ? (parseFloat(document.getElementById('stepReturnCash').value) || 0) : 0;
             const returnCashless = hasReturn ? (parseFloat(document.getElementById('stepReturnCashless').value) || 0) : 0;
-            const safeCash = parseInt(document.getElementById('safeCash').textContent.replace(/[^\d]/g,'')) || 0;
-            const safeCashless = parseInt(document.getElementById('safeCashless').textContent.replace(/[^\d]/g,'')) || 0;
+            
+            // Получаем остатки из отображаемых значений
+            const safeCashText = document.getElementById('safeCash').textContent;
+            const safeCashlessText = document.getElementById('safeCashless').textContent;
+            
+            const safeCash = parseInt(safeCashText.replace(/[^\d]/g, '')) || 0;
+            const safeCashless = parseInt(safeCashlessText.replace(/[^\d]/g, '')) || 0;
             
             let expenseCash = 0, expenseCashless = 0;
             stepExpenses.forEach(e => { 
@@ -1371,8 +1378,12 @@
             const cashless = parseFloat(document.getElementById('stepCashless').value) || 0;
             const returnCash = hasReturn ? (parseFloat(document.getElementById('stepReturnCash').value) || 0) : 0;
             const returnCashless = hasReturn ? (parseFloat(document.getElementById('stepReturnCashless').value) || 0) : 0;
-            const safeCash = parseInt(document.getElementById('safeCash').textContent.replace(/[^\d]/g,'')) || 0;
-            const safeCashless = parseInt(document.getElementById('safeCashless').textContent.replace(/[^\d]/g,'')) || 0;
+            
+            const safeCashText = document.getElementById('safeCash').textContent;
+            const safeCashlessText = document.getElementById('safeCashless').textContent;
+            
+            const safeCash = parseInt(safeCashText.replace(/[^\d]/g, '')) || 0;
+            const safeCashless = parseInt(safeCashlessText.replace(/[^\d]/g, '')) || 0;
             
             let expenseCash = 0, expenseCashless = 0;
             stepExpenses.forEach(e => { 
@@ -1410,6 +1421,7 @@
                 resetStepData();
                 setTimeout(() => goToMainMenu(), 1500);
             } catch (error) {
+                console.error(error);
                 showToast('❌ Хато', 'error');
             }
         }
@@ -1439,93 +1451,140 @@
         }
 
         // ============================================
-        // PDF
+        // PDF (ИСПРАВЛЕННАЯ ВЕРСИЯ)
         // ============================================
         function generatePDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            doc.setFontSize(22); 
-            doc.setTextColor(251,191,36); 
-            doc.text('ҲИСОБОТИ РӮЗОНА',105,20,{align:'center'});
             
-            doc.setFontSize(14); 
-            doc.setTextColor(255,255,255);
+            // Заголовок
+            doc.setFontSize(22);
+            doc.setTextColor(251, 191, 36);
+            doc.text('ҲИСОБОТИ РӮЗОНА', 105, 20, { align: 'center' });
+            
+            // Информация о магазине
+            doc.setFontSize(14);
+            doc.setTextColor(255, 255, 255);
             const shop = document.getElementById('summaryShop').textContent;
             const date = document.getElementById('summaryDate').textContent;
             const admin = document.getElementById('summaryAdmin').textContent;
-            doc.text(`Магазин: ${shop}`,20,40); 
-            doc.text(`Сана: ${date}`,20,50); 
-            doc.text(`Администратор: ${admin}`,20,60);
-            doc.setDrawColor(251,191,36); 
-            doc.line(20,65,190,65);
+            doc.text(`Магазин: ${shop}`, 20, 40);
+            doc.text(`Сана: ${date}`, 20, 50);
+            doc.text(`Администратор: ${admin}`, 20, 60);
+            doc.setDrawColor(251, 191, 36);
+            doc.line(20, 65, 190, 65);
 
             // Боқияи дирӯза
-            doc.setFillColor(37,99,235,0.2); 
-            doc.roundedRect(20,75,170,25,3,3,'F');
-            doc.setTextColor(255,255,255); 
+            doc.setFillColor(37, 99, 235, 0.2);
+            doc.roundedRect(20, 75, 170, 25, 3, 3, 'F');
+            doc.setTextColor(255, 255, 255);
             doc.setFontSize(12);
             doc.text('📦 БОҚИЯИ ДИРӮЗА ДАР СЕЙФ', 25, 85);
             doc.text(`НАҚД: ${document.getElementById('safeCash').textContent}`, 25, 95);
             doc.text(`БЕЗНАЛ: ${document.getElementById('safeCashless').textContent}`, 110, 95);
 
-            let yPos = 110;
-            doc.setTextColor(251,191,36); 
-            doc.text('Фурӯши имрӯза:',20,yPos); yPos += 10;
-            doc.setTextColor(255,255,255);
-            doc.text(`Умумӣ: ${document.getElementById('summaryTotal').textContent}`,30,yPos); yPos += 10;
-            doc.text(`Нақдӣ: ${document.getElementById('summaryCash').textContent}`,30,yPos); yPos += 10;
-            doc.text(`Безнал: ${document.getElementById('summaryCashless').textContent}`,30,yPos); yPos += 10;
+            // Фурӯш
+            let yPos = 115;
+            doc.setTextColor(251, 191, 36);
+            doc.text('Фурӯши имрӯза:', 20, yPos);
+            yPos += 10;
+            doc.setTextColor(255, 255, 255);
+            doc.text(`Умумӣ: ${document.getElementById('summaryTotal').textContent}`, 30, yPos);
+            yPos += 10;
+            doc.text(`Нақдӣ: ${document.getElementById('summaryCash').textContent}`, 30, yPos);
+            yPos += 10;
+            doc.text(`Безнал: ${document.getElementById('summaryCashless').textContent}`, 30, yPos);
+            yPos += 10;
 
-            doc.setTextColor(251,191,36); 
-            doc.text('Бозгашт:',20,yPos); yPos += 10;
-            doc.setTextColor(255,255,255);
-            doc.text(`Нақдӣ: ${document.getElementById('summaryReturnCash').textContent}`,30,yPos); yPos += 10;
-            doc.text(`Безнал: ${document.getElementById('summaryReturnCashless').textContent}`,30,yPos); yPos += 10;
+            // Бозгашт
+            doc.setTextColor(251, 191, 36);
+            doc.text('Бозгашт:', 20, yPos);
+            yPos += 10;
+            doc.setTextColor(255, 255, 255);
+            doc.text(`Нақдӣ: ${document.getElementById('summaryReturnCash').textContent}`, 30, yPos);
+            yPos += 10;
+            doc.text(`Безнал: ${document.getElementById('summaryReturnCashless').textContent}`, 30, yPos);
+            yPos += 10;
 
-            doc.setTextColor(251,191,36); 
-            doc.text('Харҷҳо:',20,yPos); yPos += 10;
-            doc.setTextColor(255,255,255);
+            // Харҷҳо
+            doc.setTextColor(251, 191, 36);
+            doc.text('Харҷҳо:', 20, yPos);
+            yPos += 10;
+            doc.setTextColor(255, 255, 255);
+            
             const expensesList = document.getElementById('summaryExpensesList').children;
             if (!expensesList.length || expensesList[0]?.textContent === 'Харҷ нест') {
-                doc.text('Харҷ нест',30,yPos); yPos += 10;
+                doc.text('Харҷ нест', 30, yPos);
+                yPos += 10;
             } else {
                 for (let i = 0; i < expensesList.length; i++) {
-                    doc.text(expensesList[i].textContent,30,yPos); yPos += 10;
-                    if (yPos > 270) { 
-                        doc.addPage(); 
-                        yPos = 20; 
+                    const text = expensesList[i].textContent;
+                    // Разбиваем длинный текст, если нужно
+                    if (text.length > 40) {
+                        const parts = text.match(/.{1,40}/g) || [];
+                        parts.forEach(part => {
+                            doc.text(part, 30, yPos);
+                            yPos += 7;
+                        });
+                    } else {
+                        doc.text(text, 30, yPos);
+                        yPos += 7;
+                    }
+                    
+                    if (yPos > 270) {
+                        doc.addPage();
+                        yPos = 20;
+                        doc.setTextColor(255, 255, 255);
                     }
                 }
+                yPos += 5;
             }
+
+            // Боқия дар сейф
+            yPos += 5;
+            doc.setTextColor(251, 191, 36);
+            doc.text('Боқия дар сейф (пас аз рӯз):', 20, yPos);
             yPos += 10;
-            doc.setTextColor(251,191,36); 
-            doc.text('Боқия дар сейф (пас аз рӯз):',20,yPos); yPos += 10;
-            doc.setTextColor(255,255,255);
-            doc.text(`НАҚД: ${document.getElementById('summarySafeCash').textContent}`,30,yPos); yPos += 10;
-            doc.text(`БЕЗНАЛ: ${document.getElementById('summarySafeCashless').textContent}`,30,yPos);
+            doc.setTextColor(255, 255, 255);
+            doc.text(`НАҚД: ${document.getElementById('summarySafeCash').textContent}`, 30, yPos);
+            yPos += 10;
+            doc.text(`БЕЗНАЛ: ${document.getElementById('summarySafeCashless').textContent}`, 30, yPos);
+            
             return doc;
         }
 
         async function sharePDF() {
             try {
-                showToast('⏳ Тайёр кардани PDF...','info');
+                showToast('⏳ Тайёр кардани PDF...', 'info');
                 const doc = generatePDF();
                 const blob = doc.output('blob');
                 const shop = document.getElementById('summaryShop').textContent;
-                const date = document.getElementById('summaryDate').textContent.replace(/\./g,'-');
+                const date = document.getElementById('summaryDate').textContent.replace(/\./g, '-');
                 const file = new File([blob], `hisobot_${shop}_${date}.pdf`, { type: 'application/pdf' });
                 
-                if (navigator.share && navigator.canShare?.({ files: [file] })) {
-                    await navigator.share({ 
-                        title: `Ҳисоботи ${shop} барои ${date}`, 
-                        files: [file] 
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: `Ҳисоботи ${shop} барои ${date}`,
+                        files: [file]
                     });
                     showToast('✅ PDF фиристода шуд!');
                 } else {
-                    showToast('❌ Фиристодан дастгирӣ намешавад', 'error');
+                    // Если нельзя отправить, скачиваем
+                    doc.save(file.name);
+                    showToast('✅ PDF зеркашӣ шуд');
                 }
-            } catch(e) {
-                showToast('❌ Хато', 'error');
+            } catch (e) {
+                console.error(e);
+                // Если ошибка при отправке, пробуем скачать
+                try {
+                    const doc = generatePDF();
+                    const shop = document.getElementById('summaryShop').textContent;
+                    const date = document.getElementById('summaryDate').textContent.replace(/\./g, '-');
+                    doc.save(`hisobot_${shop}_${date}.pdf`);
+                    showToast('✅ PDF зеркашӣ шуд');
+                } catch (e2) {
+                    showToast('❌ Хато', 'error');
+                }
             }
         }
 
@@ -1553,7 +1612,7 @@
         }
 
         // ============================================
-        // МЕСЯЧНЫЙ ОТЧЁТ (с фильтром по магазину)
+        // МЕСЯЧНЫЙ ОТЧЁТ
         // ============================================
         function changeMonth(delta) { 
             currentDate.setMonth(currentDate.getMonth() + delta); 
@@ -1561,7 +1620,7 @@
         }
         
         function updateMonthlyReport() {
-            const months = ['Январ','Феврал','Март','Апрел','Май','Июн','Июл','Август','Сентябр','Октябр','Ноябр','Декабр'];
+            const months = ['Январ', 'Феврал', 'Март', 'Апрел', 'Май', 'Июн', 'Июл', 'Август', 'Сентябр', 'Октябр', 'Ноябр', 'Декабр'];
             document.getElementById('currentMonth').textContent = months[currentDate.getMonth()] + ' ' + currentDate.getFullYear();
             
             const filterStore = document.getElementById('monthlyStoreFilter').value;
@@ -1571,12 +1630,12 @@
                 const monthMatch = d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
                 const storeMatch = filterStore ? r.store === filterStore : true;
                 return monthMatch && storeMatch;
-            }).sort((a,b) => new Date(a.date) - new Date(b.date));
+            }).sort((a, b) => new Date(a.date) - new Date(b.date));
             
-            document.getElementById('monthTotalSales').textContent = formatMoney(monthReports.reduce((s,r) => s + (r.totalSales || 0), 0));
-            document.getElementById('monthTotalExpenses').textContent = formatMoney(monthReports.reduce((s,r) => s + (r.totalExpenses || 0), 0));
-            document.getElementById('monthCash').textContent = formatMoney(monthReports.reduce((s,r) => s + (r.cash || 0), 0));
-            document.getElementById('monthCashless').textContent = formatMoney(monthReports.reduce((s,r) => s + (r.cashless || 0), 0));
+            document.getElementById('monthTotalSales').textContent = formatMoney(monthReports.reduce((s, r) => s + (r.totalSales || 0), 0));
+            document.getElementById('monthTotalExpenses').textContent = formatMoney(monthReports.reduce((s, r) => s + (r.totalExpenses || 0), 0));
+            document.getElementById('monthCash').textContent = formatMoney(monthReports.reduce((s, r) => s + (r.cash || 0), 0));
+            document.getElementById('monthCashless').textContent = formatMoney(monthReports.reduce((s, r) => s + (r.cashless || 0), 0));
             
             const tb = document.getElementById('monthlyTable');
             if (!monthReports.length) {
@@ -1592,26 +1651,40 @@
                 ).join('');
             }
             
-            // Категории для отфильтрованных отчётов
+            // Собираем расходы по категориям
             const catSums = {};
+            const categoryPromises = [];
+            
             monthReports.forEach(r => {
                 if (r.expenses) {
                     r.expenses.forEach(e => {
                         if (e.category) {
-                            // Получаем имя категории из всех категорий (не только текущего магазина)
-                            db.collection('categories').doc(e.category).get().then(doc => {
-                                if (doc.exists) {
-                                    const catName = doc.data().name;
-                                    catSums[catName] = (catSums[catName] || 0) + (e.amount || 0);
-                                    renderCharts(catSums);
-                                }
-                            });
+                            // Асинхронно получаем имя категории
+                            const promise = db.collection('categories').doc(e.category).get()
+                                .then(doc => {
+                                    if (doc.exists) {
+                                        const catName = doc.data().name;
+                                        catSums[catName] = (catSums[catName] || 0) + (e.amount || 0);
+                                    } else {
+                                        catSums[e.category] = (catSums[e.category] || 0) + (e.amount || 0);
+                                    }
+                                })
+                                .catch(() => {
+                                    catSums[e.category] = (catSums[e.category] || 0) + (e.amount || 0);
+                                });
+                            categoryPromises.push(promise);
                         }
                     });
                 }
             });
             
-            // Если нет расходов, показываем пустой график
+            // После получения всех категорий обновляем графики
+            Promise.all(categoryPromises).then(() => {
+                renderCharts(catSums);
+            }).catch(() => {
+                renderCharts(catSums);
+            });
+            
             if (Object.keys(catSums).length === 0) {
                 renderCharts({});
             }
@@ -1624,23 +1697,23 @@
                 chart.innerHTML = '<div style="text-align:center;color:var(--text-secondary);">Харҷ нест</div>';
             } else {
                 const max = Math.max(...Object.values(catSums), 1);
-                chart.innerHTML = Object.entries(catSums).map(([k,v]) => 
+                chart.innerHTML = Object.entries(catSums).map(([k, v]) => 
                     `<div class="bar-item">
                         <div class="bar" style="height:${v / max * 100}px;"></div>
-                        <div class="bar-label">${k.substring(0,3)}</div>
+                        <div class="bar-label">${k.substring(0, 3)}</div>
                     </div>`
                 ).join('');
             }
             
             // Таблица категорий
-            const total = Object.values(catSums).reduce((a,b) => a + b, 0);
+            const total = Object.values(catSums).reduce((a, b) => a + b, 0);
             const catBody = document.getElementById('categoryTable');
             if (total === 0) {
                 catBody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:16px;">Харҷ нест</td></tr>';
             } else {
                 catBody.innerHTML = Object.entries(catSums)
-                    .sort((a,b) => b[1] - a[1])
-                    .map(([k,v]) => 
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([k, v]) => 
                         `<tr>
                             <td>${k}</td>
                             <td>${formatMoney(v)}</td>
@@ -1652,7 +1725,7 @@
 
         function formatDate(ds) { 
             const d = new Date(ds); 
-            return `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth() + 1).toString().padStart(2,'0')}`; 
+            return `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}`; 
         }
 
         // ============================================
@@ -1664,7 +1737,7 @@
             const fs = document.getElementById('filterStore').value;
             if (fd) filtered = filtered.filter(r => r.date === fd);
             if (fs) filtered = filtered.filter(r => r.store === fs);
-            filtered.sort((a,b) => new Date(b.date) - new Date(a.date));
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
             
             const cont = document.getElementById('historyList');
             if (!filtered.length) { 
@@ -1674,7 +1747,7 @@
             
             cont.innerHTML = filtered.map(r => {
                 const d = new Date(r.date);
-                const ds = `${d.getDate().toString().padStart(2,'0')}.${(d.getMonth() + 1).toString().padStart(2,'0')}.${d.getFullYear()}`;
+                const ds = `${d.getDate().toString().padStart(2, '0')}.${(d.getMonth() + 1).toString().padStart(2, '0')}.${d.getFullYear()}`;
                 return `<div class="history-item">
                     <div class="header-row">
                         <div class="date">${ds}</div>
@@ -1701,7 +1774,7 @@
             try { 
                 await db.collection('reports').doc(id).delete(); 
                 showToast('✅ Ҳисобот нест шуд'); 
-            } catch(e) { 
+            } catch (e) { 
                 showToast('❌ Хато', 'error'); 
             }
         }
