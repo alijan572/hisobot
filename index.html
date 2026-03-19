@@ -913,15 +913,15 @@
 
     <script>
         // ============================================
-        // 🔥 FIREBASE КОНФИГУРАЦИЯ - ВСТАВЬ СВОЮ!
+        // 🔥 FIREBASE КОНФИГУРАЦИЯ
         // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyDqDs4QxH0jhtFvFqtR20b5lbRKGAyQV6U",
-  authDomain: "hisobot-app-914ce.firebaseapp.com",
-  projectId: "hisobot-app-914ce",
-  storageBucket: "hisobot-app-914ce.firebasestorage.app",
-  messagingSenderId: "306527113905",
-  appId: "1:306527113905:web:58c93a7a850a8403d04890"
+            authDomain: "hisobot-app-914ce.firebaseapp.com",
+            projectId: "hisobot-app-914ce",
+            storageBucket: "hisobot-app-914ce.firebasestorage.app",
+            messagingSenderId: "306527113905",
+            appId: "1:306527113905:web:58c93a7a850a8403d04890"
         };
 
         // Инициализация Firebase
@@ -1068,26 +1068,33 @@
             document.getElementById('continueBtn').classList.add('visible');
         }
 
-        async function goToDailyReport() {
+        // ИСПРАВЛЕННАЯ ФУНКЦИЯ goToDailyReport
+        function goToDailyReport() {
             if (!selectedStore) return;
+            
+            // Сбрасываем данные
             resetStepData();
+            
+            // Устанавливаем значения
             document.getElementById('stepStore').textContent = selectedStore;
             document.getElementById('stepSummaryShop').textContent = selectedStore;
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('stepDate').value = today;
             updateStepDate();
             
-            // Загружаем остатки прошлого дня из Firebase
-            const balances = await getPreviousDayBalances(selectedStore, today);
-            document.getElementById('stepSafeCash').textContent = formatMoney(balances.cash);
-            document.getElementById('stepSafeCashless').textContent = formatMoney(balances.cashless);
+            // Загружаем остатки прошлого дня из Firebase (асинхронно)
+            getPreviousDayBalances(selectedStore, today).then(balances => {
+                document.getElementById('stepSafeCash').textContent = formatMoney(balances.cash);
+                document.getElementById('stepSafeCashless').textContent = formatMoney(balances.cashless);
+            });
             
+            // Показываем первый шаг
             showScreen('dailyStep1');
             document.getElementById('navBar').style.display = 'flex';
         }
 
         // ============================================
-        // ФУНКЦИИ ШАГОВ (как в предыдущем коде)
+        // ФУНКЦИИ ШАГОВ
         // ============================================
         function resetStepData() {
             stepExpenses = []; stepReceiptImage = null; hasReturn = false;
