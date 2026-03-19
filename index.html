@@ -1024,30 +1024,40 @@
         function loadData() {
             const savedReports = localStorage.getItem('reports');
             if (savedReports) {
-                reports = JSON.parse(savedReports);
+                try {
+                    reports = JSON.parse(savedReports);
+                } catch (e) {
+                    reports = [];
+                }
             }
             
             const savedCategories = localStorage.getItem('categories');
             if (savedCategories) {
-                categories = JSON.parse(savedCategories);
-            } else {
-                // Базовые категории для каждого магазина
+                try {
+                    categories = JSON.parse(savedCategories);
+                } catch (e) {
+                    categories = [];
+                }
+            }
+            
+            // Если категорий нет, создаём базовые
+            if (categories.length === 0) {
                 categories = [
-                    { id: 'products', name: 'Маҳсулот', store: 'F-1' },
-                    { id: 'salary', name: 'Музд', store: 'F-1' },
-                    { id: 'rent', name: 'Иҷора', store: 'F-1' },
-                    { id: 'utilities', name: 'Коммунал', store: 'F-1' },
-                    { id: 'other', name: 'Дигар', store: 'F-1' },
-                    { id: 'products5', name: 'Маҳсулот', store: 'F-5' },
-                    { id: 'salary5', name: 'Музд', store: 'F-5' },
-                    { id: 'rent5', name: 'Иҷора', store: 'F-5' },
-                    { id: 'utilities5', name: 'Коммунал', store: 'F-5' },
-                    { id: 'other5', name: 'Дигар', store: 'F-5' },
-                    { id: 'products7', name: 'Маҳсулот', store: 'F-7' },
-                    { id: 'salary7', name: 'Музд', store: 'F-7' },
-                    { id: 'rent7', name: 'Иҷора', store: 'F-7' },
-                    { id: 'utilities7', name: 'Коммунал', store: 'F-7' },
-                    { id: 'other7', name: 'Дигар', store: 'F-7' }
+                    { id: 'products_F-1', name: 'Маҳсулот', store: 'F-1' },
+                    { id: 'salary_F-1', name: 'Музд', store: 'F-1' },
+                    { id: 'rent_F-1', name: 'Иҷора', store: 'F-1' },
+                    { id: 'utilities_F-1', name: 'Коммунал', store: 'F-1' },
+                    { id: 'other_F-1', name: 'Дигар', store: 'F-1' },
+                    { id: 'products_F-5', name: 'Маҳсулот', store: 'F-5' },
+                    { id: 'salary_F-5', name: 'Музд', store: 'F-5' },
+                    { id: 'rent_F-5', name: 'Иҷора', store: 'F-5' },
+                    { id: 'utilities_F-5', name: 'Коммунал', store: 'F-5' },
+                    { id: 'other_F-5', name: 'Дигар', store: 'F-5' },
+                    { id: 'products_F-7', name: 'Маҳсулот', store: 'F-7' },
+                    { id: 'salary_F-7', name: 'Музд', store: 'F-7' },
+                    { id: 'rent_F-7', name: 'Иҷора', store: 'F-7' },
+                    { id: 'utilities_F-7', name: 'Коммунал', store: 'F-7' },
+                    { id: 'other_F-7', name: 'Дигар', store: 'F-7' }
                 ];
                 saveCategories();
             }
@@ -1100,32 +1110,13 @@
             updateStepDate();
             
             // Загружаем категории для этого магазина
-            loadCategoriesForStore();
+            renderCategories();
             
             // Загружаем остатки прошлого дня
             loadPreviousDayBalance();
             
             showScreen('dailyStep1');
             document.getElementById('navBar').style.display = 'flex';
-        }
-
-        function loadCategoriesForStore() {
-            const storeCategories = categories.filter(c => c.store === selectedStore);
-            if (storeCategories.length === 0) {
-                // Если нет категорий, создаём базовые для этого магазина
-                const newCategories = [
-                    { id: `products_${selectedStore}`, name: 'Маҳсулот', store: selectedStore },
-                    { id: `salary_${selectedStore}`, name: 'Музд', store: selectedStore },
-                    { id: `rent_${selectedStore}`, name: 'Иҷора', store: selectedStore },
-                    { id: `utilities_${selectedStore}`, name: 'Коммунал', store: selectedStore },
-                    { id: `other_${selectedStore}`, name: 'Дигар', store: selectedStore }
-                ];
-                categories = [...categories, ...newCategories];
-                saveCategories();
-                renderCategories();
-            } else {
-                renderCategories();
-            }
         }
 
         function loadPreviousDayBalance() {
@@ -1459,10 +1450,13 @@
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             
+            let y = 20;
+            
             // Заголовок
-            doc.setFontSize(22);
+            doc.setFontSize(20);
             doc.setTextColor(251, 191, 36);
-            doc.text('ҲИСОБОТИ РӮЗОНА', 105, 20, { align: 'center' });
+            doc.text('ҲИСОБОТИ РӮЗОНА', 105, y, { align: 'center' });
+            y += 15;
             
             // Информация о магазине
             doc.setFontSize(14);
@@ -1470,86 +1464,86 @@
             const shop = document.getElementById('summaryShop').textContent;
             const date = document.getElementById('summaryDate').textContent;
             const admin = document.getElementById('summaryAdmin').textContent;
-            doc.text(`Магазин: ${shop}`, 20, 40);
-            doc.text(`Сана: ${date}`, 20, 50);
-            doc.text(`Администратор: ${admin}`, 20, 60);
+            doc.text(`Магазин: ${shop}`, 20, y);
+            y += 10;
+            doc.text(`Сана: ${date}`, 20, y);
+            y += 10;
+            doc.text(`Администратор: ${admin}`, 20, y);
+            y += 10;
+            
+            // Линия
             doc.setDrawColor(251, 191, 36);
-            doc.line(20, 65, 190, 65);
-
+            doc.line(20, y, 190, y);
+            y += 10;
+            
             // Боқияи дирӯза
-            doc.setFillColor(37, 99, 235, 0.2);
-            doc.roundedRect(20, 75, 170, 25, 3, 3, 'F');
-            doc.setTextColor(255, 255, 255);
             doc.setFontSize(12);
-            doc.text('📦 БОҚИЯИ ДИРӮЗА ДАР СЕЙФ', 25, 85);
-            doc.text(`НАҚД: ${document.getElementById('safeCash').textContent}`, 25, 95);
-            doc.text(`БЕЗНАЛ: ${document.getElementById('safeCashless').textContent}`, 110, 95);
-
-            // Фурӯш
-            let yPos = 115;
-            doc.setTextColor(251, 191, 36);
-            doc.text('Фурӯши имрӯза:', 20, yPos);
-            yPos += 10;
+            doc.setTextColor(37, 99, 235);
+            doc.text('📦 БОҚИЯИ ДИРӮЗА ДАР СЕЙФ', 20, y);
+            y += 8;
             doc.setTextColor(255, 255, 255);
-            doc.text(`Умумӣ: ${document.getElementById('summaryTotal').textContent}`, 30, yPos);
-            yPos += 10;
-            doc.text(`Нақдӣ: ${document.getElementById('summaryCash').textContent}`, 30, yPos);
-            yPos += 10;
-            doc.text(`Безнал: ${document.getElementById('summaryCashless').textContent}`, 30, yPos);
-            yPos += 10;
-
+            doc.text(`НАҚД: ${document.getElementById('safeCash').textContent}`, 30, y);
+            y += 8;
+            doc.text(`БЕЗНАЛ: ${document.getElementById('safeCashless').textContent}`, 30, y);
+            y += 12;
+            
+            // Фурӯш
+            doc.setTextColor(251, 191, 36);
+            doc.text('💰 Фурӯши имрӯза:', 20, y);
+            y += 8;
+            doc.setTextColor(255, 255, 255);
+            doc.text(`Умумӣ: ${document.getElementById('summaryTotal').textContent}`, 30, y);
+            y += 8;
+            doc.text(`Нақдӣ: ${document.getElementById('summaryCash').textContent}`, 30, y);
+            y += 8;
+            doc.text(`Безнал: ${document.getElementById('summaryCashless').textContent}`, 30, y);
+            y += 12;
+            
             // Бозгашт
             doc.setTextColor(251, 191, 36);
-            doc.text('Бозгашт:', 20, yPos);
-            yPos += 10;
+            doc.text('↩️ Бозгашт:', 20, y);
+            y += 8;
             doc.setTextColor(255, 255, 255);
-            doc.text(`Нақдӣ: ${document.getElementById('summaryReturnCash').textContent}`, 30, yPos);
-            yPos += 10;
-            doc.text(`Безнал: ${document.getElementById('summaryReturnCashless').textContent}`, 30, yPos);
-            yPos += 10;
-
+            doc.text(`Нақдӣ: ${document.getElementById('summaryReturnCash').textContent}`, 30, y);
+            y += 8;
+            doc.text(`Безнал: ${document.getElementById('summaryReturnCashless').textContent}`, 30, y);
+            y += 12;
+            
             // Харҷҳо
             doc.setTextColor(251, 191, 36);
-            doc.text('Харҷҳо:', 20, yPos);
-            yPos += 10;
+            doc.text('📉 Харҷҳо:', 20, y);
+            y += 8;
             doc.setTextColor(255, 255, 255);
             
             const expensesList = document.getElementById('summaryExpensesList').children;
             if (!expensesList.length || expensesList[0]?.textContent === 'Харҷ нест') {
-                doc.text('Харҷ нест', 30, yPos);
-                yPos += 10;
+                doc.text('Харҷ нест', 30, y);
+                y += 10;
             } else {
                 for (let i = 0; i < expensesList.length; i++) {
                     const text = expensesList[i].textContent;
-                    if (text.length > 40) {
-                        const parts = text.match(/.{1,40}/g) || [];
-                        parts.forEach(part => {
-                            doc.text(part, 30, yPos);
-                            yPos += 7;
-                        });
-                    } else {
-                        doc.text(text, 30, yPos);
-                        yPos += 7;
-                    }
+                    const shortText = text.length > 50 ? text.substring(0, 47) + '...' : text;
+                    doc.text(shortText, 30, y);
+                    y += 8;
                     
-                    if (yPos > 270) {
+                    if (y > 280) {
                         doc.addPage();
-                        yPos = 20;
+                        y = 20;
                         doc.setTextColor(255, 255, 255);
                     }
                 }
-                yPos += 5;
+                y += 4;
             }
-
+            
             // Боқия дар сейф
-            yPos += 5;
+            y += 4;
             doc.setTextColor(251, 191, 36);
-            doc.text('Боқия дар сейф (пас аз рӯз):', 20, yPos);
-            yPos += 10;
+            doc.text('🏦 Боқия дар сейф (пас аз рӯз):', 20, y);
+            y += 8;
             doc.setTextColor(255, 255, 255);
-            doc.text(`НАҚД: ${document.getElementById('summarySafeCash').textContent}`, 30, yPos);
-            yPos += 10;
-            doc.text(`БЕЗНАЛ: ${document.getElementById('summarySafeCashless').textContent}`, 30, yPos);
+            doc.text(`НАҚД: ${document.getElementById('summarySafeCash').textContent}`, 30, y);
+            y += 8;
+            doc.text(`БЕЗНАЛ: ${document.getElementById('summarySafeCashless').textContent}`, 30, y);
             
             return doc;
         }
@@ -1561,7 +1555,8 @@
                 const blob = doc.output('blob');
                 const shop = document.getElementById('summaryShop').textContent;
                 const date = document.getElementById('summaryDate').textContent.replace(/\./g, '-');
-                const file = new File([blob], `hisobot_${shop}_${date}.pdf`, { type: 'application/pdf' });
+                const fileName = `hisobot_${shop}_${date}.pdf`;
+                const file = new File([blob], fileName, { type: 'application/pdf' });
                 
                 if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                     await navigator.share({
@@ -1570,8 +1565,7 @@
                     });
                     showToast('✅ PDF фиристода шуд!');
                 } else {
-                    // Если нельзя отправить, скачиваем
-                    doc.save(file.name);
+                    doc.save(fileName);
                     showToast('✅ PDF зеркашӣ шуд');
                 }
             } catch (e) {
@@ -1583,7 +1577,7 @@
                     doc.save(`hisobot_${shop}_${date}.pdf`);
                     showToast('✅ PDF зеркашӣ шуд');
                 } catch (e2) {
-                    showToast('❌ Хато', 'error');
+                    showToast('❌ Хато дар сохтани PDF', 'error');
                 }
             }
         }
@@ -1651,7 +1645,6 @@
                 ).join('');
             }
             
-            // Категории
             const catSums = {};
             
             monthReports.forEach(r => {
@@ -1665,10 +1658,6 @@
                 }
             });
             
-            renderCharts(catSums);
-        }
-        
-        function renderCharts(catSums) {
             // График
             const chart = document.getElementById('expenseChart');
             if (Object.keys(catSums).length === 0) {
