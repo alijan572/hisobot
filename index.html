@@ -105,63 +105,112 @@ button:active,.tap-pressed{transform:scale(.975)}
 
 @media (pointer:coarse){button,.chip,.price-btn,.small-btn{touch-action:manipulation}.small-btn{min-height:48px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* ==========================================================
+   CLEAN iPAD MODE — спокойный экран для быстрого пересчёта
+========================================================== */
+:root{
+  --bg:#0b0e13;--surface:#12171f;--surface2:#171e28;--surface3:#202936;
+  --line:#26303d;--line2:#344154;--text:#f5f7fb;--muted:#7f8a99;
+  --primary:#4d82f3;--green:#35ba6b;--red:#df5962;--amber:#f4c85f;
+  --radius:16px;--shadow:none;--tap:50px;
+}
+body{background:var(--bg)}
+.topbar{min-height:54px;padding:7px 14px;border-bottom:1px solid #202733;background:#0b0e13;gap:10px}
+.brand h1{font-size:18px;font-weight:780;letter-spacing:-.25px}.brand small{display:none}
+.top-total{min-width:96px;padding:5px 10px;border-radius:12px;background:transparent;border:0}.top-total span{font-size:9px;color:#667282}.top-total b{font-size:18px;color:#fff}
+.section-head{margin:4px 0 5px;min-height:30px}.section-title{font-size:11px;letter-spacing:.45px;color:#7e8998}.counter{display:none}
+.scroller{gap:7px;padding:0 0 7px;scroll-snap-type:none}.chip{min-height:46px;padding:9px 13px;border-radius:12px;font-size:14px;background:#151c26;border-color:#242e3b;box-shadow:none}.chip.active{background:#2c559a;border-color:#4d82f3;box-shadow:none}.chip.group{background:#181d26;border-color:#2a313d}.chip.group.active{background:#36304b;border-color:#7667a6}
+.tools-toggle{min-height:34px;border:0;background:transparent;color:#91a0b5;padding:4px 3px;font-size:12px;font-weight:750;border-radius:8px}.tools-toggle:active{color:#fff;transform:none}
+.price-box{margin-top:2px}.price-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:3px 0 6px}.price-toolbar .section-title{flex:0 0 auto}
+.qty-picker{display:flex;align-items:center;gap:5px;margin:0;padding:0;background:transparent;border:0;border-radius:0}.qty-picker-label{display:none}.qty-step{min-width:50px;min-height:36px;padding:5px 10px;border-radius:10px;background:#171e28;border:1px solid #27313e;font-size:14px;color:#aeb9c8}.qty-step.active{background:#225f3e;border-color:#35ba6b;color:#dff7e8;box-shadow:none}
+.price-grid{gap:7px;padding:7px;background:#10151d;border-color:#222c38;border-radius:14px}.price-btn{min-height:58px;border-radius:12px;background:#18212c;border-color:#26313f;font-size:16px;box-shadow:none}.price-btn .num{font-size:10px;color:#7dc79a}.price-btn .counted{font-size:10px;color:#d9b95b}.price-btn:active{transform:scale(.985);background:#202c3b}
+.extra-tools{display:none;margin-top:8px;padding:9px;background:#10151d;border:1px solid #222c38;border-radius:14px}.extra-tools.open{display:block}.search-row,.command-row,.manual{margin:0 0 7px}.manual{margin-bottom:0}.search,.manual input{min-height:46px;border-radius:11px;background:#0d1219;border-color:#25303c;font-size:15px}.icon-btn{min-width:46px;min-height:46px;border-radius:11px;font-size:20px}.command-row{grid-template-columns:145px 1fr}.mic-btn,.status{min-height:46px;border-radius:11px}.mic-btn{font-size:14px;padding:9px}.status{font-size:11px;justify-content:flex-start;text-align:left}.manual button{min-height:46px;border-radius:11px}
+.cart-card{background:#10151d;border-color:#222c38;border-radius:14px}.cart-row{padding:8px 9px;border-bottom-color:#202936}.cart-row:nth-child(even){background:transparent}.cart-name b{font-size:13px}.cart-name small{font-size:10px}.num-inp{min-height:42px;border-radius:10px;background:#0b1016;border-color:#25303c}.num-inp.qty{font-size:18px}.mini{width:38px;height:38px;border-radius:10px;font-size:20px}.mini.plus{background:#2f995a}.mini.minus{background:#b84e57}.sum{font-size:12px}
+.bottom-summary{margin-top:7px}.summary{min-height:48px;padding:7px 11px;border-radius:12px;background:#151c26;border-color:#242e3b}.summary span{font-size:11px}.summary b{font-size:16px;color:#fff}.danger,.btn,.btn2{min-height:44px;border-radius:11px}.bottom-summary .danger{padding:7px 10px;font-size:12px;background:#412127;color:#f1a6ad}.bottom-summary #undoBtn{min-width:46px;font-size:19px}
+.nav{background:#111720;border-color:#222c38;box-shadow:none;border-radius:18px}.nav button{font-weight:700}.nav button.active{background:#294d8a;box-shadow:none}.nav-ico{display:block;font-size:16px;line-height:1;margin-bottom:3px}
+.sheet-head{margin-top:1px}.sheet-head .counter{display:block;color:#7e8998;font-size:11px}
+
+/* iPad portrait */
+@media (min-width:700px) and (max-width:899px){
+  #panelMain.active{padding:9px 14px calc(78px + var(--safe-bottom))}.topbar{padding-left:16px;padding-right:16px}
+  .price-grid{grid-template-columns:repeat(5,1fr);max-height:224px}.nav{width:560px;bottom:8px;padding:5px}.nav button{min-height:48px}
+  .sale-cart-pane{min-height:210px}.cart-card{min-height:160px}
+}
+
+/* iPad 6 9.7\" landscape */
+@media (min-width:900px) and (min-height:600px){
+  #app{padding-left:calc(72px + var(--safe-left))}.topbar{min-height:52px;padding:6px 14px}.brand h1{font-size:17px}
+  .nav{left:calc(7px + var(--safe-left));top:calc(7px + var(--safe-top));bottom:7px;width:58px;padding:5px;border-radius:17px;grid-template-rows:repeat(3,68px);gap:6px}
+  .nav button{min-height:68px;padding:5px 2px;font-size:9px;border-radius:12px}.nav-ico{font-size:16px;margin-bottom:4px}
+  #panelMain.active{padding:8px 10px}.sale-layout{grid-template-columns:minmax(390px,45%) minmax(0,55%);gap:9px}
+  .sale-controls{overflow:hidden}.sale-cart-pane{min-height:0}.section-head{min-height:28px;margin:2px 0 4px}
+  .chip{min-height:44px;font-size:13px;padding:8px 12px}.scroller{padding-bottom:5px}
+  .price-toolbar{margin:1px 0 5px}.qty-step{min-width:48px;min-height:34px}
+  .price-grid{grid-template-columns:repeat(4,1fr);height:calc(100vh - 272px);min-height:280px;max-height:none;align-content:start}.price-btn{min-height:58px}
+  .extra-tools.open{position:absolute;left:82px;top:184px;width:394px;z-index:60;box-shadow:0 14px 35px rgba(0,0,0,.4)}
+  .cart-row{grid-template-columns:minmax(110px,1fr) 62px 78px 78px 80px;gap:5px;padding:7px 8px}.num-inp{min-height:40px}.mini{width:36px;height:36px}
+  .bottom-summary{margin-top:6px}.summary{min-height:46px}.panel:not(#panelMain){padding:14px 20px 20px;max-width:950px}.toast{left:calc(50% + 36px)}.modal-back{padding-left:72px}
+}
+
 </style>
 </head>
 <body>
 <div id="app">
   <header class="topbar">
     <div class="brand">
-      <h1>📦 Инвентаризация · iPad</h1>
-      <small id="saveState">Лист пересчёта сохраняется автоматически</small>
+      <h1>Учёт товаров</h1>
+      <small id="saveState">Сохранено</small>
     </div>
-    <div class="top-total"><span>НАСЧИТАНО</span><b id="topTotal">0 шт.</b></div>
+    <div class="top-total"><span>ВСЕГО</span><b id="topTotal">0 шт.</b></div>
   </header>
 
   <main class="content">
     <section id="panelMain" class="panel active">
       <div class="sale-layout">
         <div class="sale-controls">
-          <div class="section-head"><div class="section-title">1. Группа / стеллаж</div><div class="counter" id="groupCounter"></div></div>
+          <div class="section-head"><div class="section-title">Стеллаж</div><div class="counter" id="groupCounter"></div></div>
           <div id="groups" class="scroller"></div>
 
-          <div class="section-head"><div class="section-title">2. Товар</div><div class="counter" id="productCounter"></div></div>
-          <div class="search-row">
-            <input id="productSearch" class="search" type="search" placeholder="Поиск по всем товарам…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-            <button id="clearSearch" class="icon-btn" title="Очистить поиск" aria-label="Очистить поиск">×</button>
-          </div>
+          <div class="section-head"><div class="section-title">Товар</div><span id="productCounter" class="counter"></span><button id="toolsToggle" class="tools-toggle" type="button" aria-expanded="false">⌕ Поиск / голос</button></div>
           <div id="products" class="scroller"></div>
 
           <div class="price-box">
-            <div class="section-head"><div class="section-title">3. Цена / ценовая группа</div><div class="counter" id="priceCounter"></div></div>
-            <div id="prices" class="price-grid"></div>
-            <div id="qtyPicker" class="qty-picker" aria-label="Количество за одно нажатие">
-              <div class="qty-picker-label">За нажатие</div>
-              <button class="qty-step active" data-count-step="1">×1</button>
-              <button class="qty-step" data-count-step="2">×2</button>
-              <button class="qty-step" data-count-step="5">×5</button>
-              <button class="qty-step" data-count-step="10">×10</button>
+            <div class="price-toolbar">
+              <div class="section-title">Цена</div><span id="priceCounter" class="counter"></span>
+              <div id="qtyPicker" class="qty-picker" aria-label="Количество за одно нажатие">
+                <button class="qty-step active" data-count-step="1">×1</button>
+                <button class="qty-step" data-count-step="2">×2</button>
+                <button class="qty-step" data-count-step="5">×5</button>
+                <button class="qty-step" data-count-step="10">×10</button>
+              </div>
             </div>
+            <div id="prices" class="price-grid"></div>
           </div>
 
-          <div class="command-row">
-            <button id="micBtn" class="mic-btn">🎤 Говорить</button>
-            <div id="status" class="status" aria-live="polite">Выбери товар и считай фактическое количество</div>
-          </div>
-
-          <div class="manual">
-            <input id="manualInput" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-                   placeholder="3 · 3 5 · 5 по 12,99 · футболка мужская 3">
-            <button id="manualGo">OK</button>
+          <div id="extraTools" class="extra-tools" aria-hidden="true">
+            <div class="search-row">
+              <input id="productSearch" class="search" type="search" placeholder="Найти товар…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+              <button id="clearSearch" class="icon-btn" title="Очистить поиск" aria-label="Очистить поиск">×</button>
+            </div>
+            <div class="command-row">
+              <button id="micBtn" class="mic-btn">🎤 Голос</button>
+              <div id="status" class="status" aria-live="polite">Готов к учёту</div>
+            </div>
+            <div class="manual">
+              <input id="manualInput" type="text" inputmode="decimal" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Например: 3 5 или 5 по 12,99">
+              <button id="manualGo">OK</button>
+            </div>
           </div>
         </div>
 
         <div class="sale-cart-pane">
-          <div class="section-head"><div class="section-title">Лист пересчёта</div><div class="counter">автосохранение</div></div>
+          <div class="section-head sheet-head"><div class="section-title">Посчитано</div><div class="counter" id="sheetMiniTotal">0 шт.</div></div>
           <div id="countSheet" class="cart-card"></div>
           <div class="bottom-summary">
-            <div class="summary"><span><b id="lineCount">0</b> поз. · <b id="unitCount">0</b> шт.</span><span style="text-align:right">Стоимость остатка<br><b id="total">0 ₽</b></span></div>
+            <div class="summary"><span><b id="lineCount">0</b> поз. · <b id="unitCount">0</b> шт.</span><span><b id="total">0 ₽</b></span></div>
             <button id="undoBtn" class="btn2" disabled title="Отменить последнее действие" aria-label="Отменить">↶</button>
-            <button id="clearBtn" class="danger">Очистить лист</button>
+            <button id="clearBtn" class="danger">Очистить</button>
           </div>
         </div>
       </div>
@@ -236,9 +285,9 @@ button:active,.tap-pressed{transform:scale(.975)}
   </main>
 
   <nav class="nav">
-    <button class="active" data-tab="main">📦 Учёт</button>
-    <button data-tab="settings">⚙️ Настройки</button>
-    <button data-tab="export">📤 Экспорт</button>
+    <button class="active" data-tab="main"><span class="nav-ico">●</span><span>Учёт</span></button>
+    <button data-tab="settings"><span class="nav-ico">⚙︎</span><span>Настройки</span></button>
+    <button data-tab="export"><span class="nav-ico">↑</span><span>Экспорт</span></button>
   </nav>
 </div>
 
@@ -374,6 +423,18 @@ var E={
   confirmYes:$('confirmYes'),confirmNo:$('confirmNo')
 };
 
+/* Чистый экран: дополнительные инструменты показываются только по запросу */
+var toolsToggle=$('toolsToggle'), extraTools=$('extraTools'), sheetMiniTotal=$('sheetMiniTotal');
+if(toolsToggle&&extraTools){
+  toolsToggle.onclick=function(){
+    var open=extraTools.classList.toggle('open');
+    extraTools.setAttribute('aria-hidden',open?'false':'true');
+    toolsToggle.setAttribute('aria-expanded',open?'true':'false');
+    toolsToggle.textContent=open?'× Закрыть':'⌕ Поиск / голос';
+    if(open) setTimeout(function(){try{E.productSearch.focus();}catch(e){}},60);
+  };
+}
+
 /* =========================
    Общие утилиты
 ========================= */
@@ -407,7 +468,7 @@ function scheduleSave(){
 function saveNow(){
   try{
     localStorage.setItem(STORE_KEY,JSON.stringify(state));
-    E.saveState.textContent='Сохранено автоматически';
+    E.saveState.textContent='Сохранено';
     return true;
   }catch(e){E.saveState.textContent='Ошибка сохранения';toast('Не удалось сохранить');return false;}
 }
@@ -536,7 +597,7 @@ function renderSheet(){
     E.sheet.appendChild(frag);
   }
   total=roundMoney(total);
-  E.total.textContent=fmtMoney(total);E.topTotal.textContent=units+' шт.';E.lineCount.textContent=state.sheet.length;E.unitCount.textContent=units;
+  E.total.textContent=fmtMoney(total);E.topTotal.textContent=units+' шт.';E.lineCount.textContent=state.sheet.length;E.unitCount.textContent=units;if(sheetMiniTotal)sheetMiniTotal.textContent=units+' шт.';
   E.undoBtn.disabled=!historyStack.length;
 }
 E.sheet.onclick=function(e){
